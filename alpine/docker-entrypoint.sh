@@ -7,10 +7,23 @@ if [ "${1#-}" != "$1" ] || [ "${1%.conf}" != "$1" ]; then
 	set -- redis-server "$@"
 fi
 
-# allow the container to be started with `--user`
-if [ "$1" = 'redis-server' -a "$(id -u)" = '0' ]; then
+CMD=$(realpath $(command -v "$1") 2>/dev/null || :)
+# drop pivileges only if our uid is 0 (`--user` is not set)
+if [ \( "$CMD" = '/usr/local/bin/redis-server' -o "$CMD" = '/usr/local/bin/redis-sentinel' \) -a "$(id -u)" = '0' ]; then
 	find . \! -user redis -exec chown redis '{}' +
-	exec gosu redis "$0" "$@"
+	SECUREBITS_ARG=""
+	if /usr/bin/setpriv -d | grep -q 'Capability bounding set:.*setpcap'; then
+		# we have setpcap, use it to lock down securebits
+		SECUREBITS_ARG="--securebits=+noroot,+noroot_locked,+no_setuid_fixup,+no_setuid_fixup_locked,+keep_caps_locked"
+	fi
+	exec /usr/bin/setpriv \
+		--reuid redis \
+		--regid redis \
+		--clear-groups \
+		--nnp \
+		--bounding-set=-all \
+		$SECUREBITS_ARG \
+		"$0" "$@"
 fi
 
 # set an appropriate umask (if one isn't set already)
