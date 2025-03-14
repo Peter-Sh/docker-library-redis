@@ -8,7 +8,7 @@ if [ "${1#-}" != "$1" ] || [ "${1%.conf}" != "$1" ]; then
 fi
 
 CMD=$(realpath $(command -v "$1") 2>/dev/null || :)
-# drop pivileges only if our uid is 0 (`--user` is not set)
+# drop privileges only if our uid is 0 (container started without explicit --user)
 if [ \( "$CMD" = '/usr/local/bin/redis-server' -o "$CMD" = '/usr/local/bin/redis-sentinel' \) -a "$(id -u)" = '0' ]; then
 	find . \! -user redis -exec chown redis '{}' +
 	SECUREBITS_ARG=""
