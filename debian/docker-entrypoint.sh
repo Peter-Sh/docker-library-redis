@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+has_cap() {
+	/usr/bin/setpriv -d | grep -q 'Capability bounding set:.*\b'$1'\b'
+}
+
 # first arg is `-f` or `--some-option`
 # or first arg is `something.conf`
 if [ "${1#-}" != "$1" ] || [ "${1%.conf}" != "$1" ]; then
@@ -9,14 +13,24 @@ fi
 
 CMD=$(realpath $(command -v "$1") 2>/dev/null || :)
 # drop privileges only if our uid is 0 (container started without explicit --user)
-if [ \( "$CMD" = '/usr/local/bin/redis-server' -o "$CMD" = '/usr/local/bin/redis-sentinel' \) -a "$(id -u)" = '0' ]; then
+# and we have capabilities required to drop privs
+if has_cap setuid && has_cap setgid && \
+	[ \( "$CMD" = '/usr/local/bin/redis-server' -o "$CMD" = '/usr/local/bin/redis-sentinel' \) -a "$(id -u)" = '0' ]; then
 	find . \! -user redis -exec chown redis '{}' +
+	CAPS_TO_KEEP=""
+	if has_cap sys_resource; then
+		# we have sys_resource capability, keep it available for redis
+		# as redis may use it to increase open files limit
+		CAPS_TO_KEEP=",+sys_resource"
+	fi
 	exec /usr/bin/setpriv \
 		--reuid redis \
 		--regid redis \
 		--clear-groups \
 		--nnp \
-		--bounding-set=-all \
+		--inh-caps=-all$CAPS_TO_KEEP \
+		--ambient-caps=-all$CAPS_TO_KEEP \
+		--bounding-set=-all$CAPS_TO_KEEP \
 		"$0" "$@"
 fi
 
