@@ -1,4 +1,4 @@
-FROM alpine:3.21
+FROM alpine:3.22
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN set -eux; \
@@ -43,7 +43,8 @@ RUN set -eux; \
 		build-base \
 		cargo \
 		clang \
-		clang18-libclang \
+		clang-static \
+		clang-libclang \
 		cmake \
 		curl \
 		g++ \
@@ -51,6 +52,8 @@ RUN set -eux; \
 		libffi-dev \
 		libgcc \
 		libtool \
+		llvm-dev \
+		ncurses-dev \
 		openssh \
 		openssl  \
 		py-virtualenv \
@@ -100,6 +103,8 @@ RUN set -eux; \
 	sed -ri 's!cd jemalloc && ./configure !&'"$extraJemallocConfigureFlags"' !' /usr/src/redis/deps/Makefile; \
 	grep -F "cd jemalloc && ./configure $extraJemallocConfigureFlags " /usr/src/redis/deps/Makefile; \
 	\
+# Disable static linking the C runtime for RediSearch's rust submodule
+	export RUST_DYN_CRT=1; \
 	export BUILD_TLS=yes; \
 	if [ "$BUILD_WITH_MODULES" = "yes" ]; then \
 		make -C /usr/src/redis/modules/redisjson get_source; \
