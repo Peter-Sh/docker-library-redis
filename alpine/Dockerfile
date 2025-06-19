@@ -1,4 +1,4 @@
-FROM alpine:3.21
+FROM alpine:3.22
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN set -eux; \
@@ -14,8 +14,8 @@ RUN set -eux; \
 # we need setpriv package as busybox provides very limited functionality
 		setpriv \
 	;
-ENV REDIS_DOWNLOAD_URL=https://github.com/redis/redis/archive/refs/tags/8.0.2.tar.gz
-ENV REDIS_DOWNLOAD_SHA=caf3c0069f06fc84c5153bd2a348b204c578de80490c73857bee01d9b5d7401f
+ENV REDIS_DOWNLOAD_URL=https://github.com/redis/redis/archive/refs/tags/8.2-m01.tar.gz
+ENV REDIS_DOWNLOAD_SHA=0a1d5a27dd9cb13d51bcaba6546dd54b529774ede5d8993fce5c3ac2bace0f72
 RUN set -eux; \
 	\
 	apk add --no-cache --virtual .build-deps \
@@ -43,7 +43,8 @@ RUN set -eux; \
 		build-base \
 		cargo \
 		clang \
-		clang18-libclang \
+		clang-static \
+		clang-libclang \
 		cmake \
 		curl \
 		g++ \
@@ -51,6 +52,8 @@ RUN set -eux; \
 		libffi-dev \
 		libgcc \
 		libtool \
+		llvm-dev \
+		ncurses-dev \
 		openssh \
 		openssl  \
 		py-virtualenv \
@@ -100,6 +103,8 @@ RUN set -eux; \
 	sed -ri 's!cd jemalloc && ./configure !&'"$extraJemallocConfigureFlags"' !' /usr/src/redis/deps/Makefile; \
 	grep -F "cd jemalloc && ./configure $extraJemallocConfigureFlags " /usr/src/redis/deps/Makefile; \
 	\
+# Disable static linking the C runtime for RediSearch's rust submodule
+	export RUST_DYN_CRT=1; \
 	export BUILD_TLS=yes; \
 	if [ "$BUILD_WITH_MODULES" = "yes" ]; then \
 		make -C /usr/src/redis/modules/redisjson get_source; \
