@@ -68,9 +68,9 @@ else
     echo "Using base branch: $BASE_BRANCH"
 
     # Create new branch based on base branch and push to origin
-    execute command git fetch origin "$BASE_BRANCH"
-    execute command git checkout -b "$RELEASE_BRANCH" "origin/$BASE_BRANCH"
-    execute command git push origin HEAD:"$RELEASE_BRANCH"
+    execute_command git fetch origin "$BASE_BRANCH"
+    execute_command git checkout -b "$RELEASE_BRANCH" "origin/$BASE_BRANCH"
+    execute_command git push origin HEAD:"$RELEASE_BRANCH"
     echo "Created and pushed $RELEASE_BRANCH based on $BASE_BRANCH"
 fi
 
