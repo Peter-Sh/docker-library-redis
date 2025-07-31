@@ -1,12 +1,13 @@
 on:
   workflow_dispatch:
-  inputs:
-    release_tag:
-      description: 'Release tag to build'
-      required: true
+    inputs:
+      release_tag:
+        description: 'Release tag to build'
+        required: true
 
 jobs:
   build-and-test:
+  runs-on: ["self-hosted"]
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
