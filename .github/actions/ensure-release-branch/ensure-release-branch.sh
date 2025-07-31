@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+#set -x
 
 # Input TAG is expected in $1
 TAG="$1"
@@ -69,7 +70,7 @@ else
     # Create new branch based on base branch and push to origin
     git fetch origin "$BASE_BRANCH"
     git checkout -b "$RELEASE_BRANCH" "origin/$BASE_BRANCH"
-    git push origin "$RELEASE_BRANCH"
+    git push origin HEAD:"$RELEASE_BRANCH"
     echo "Created and pushed $RELEASE_BRANCH based on $BASE_BRANCH"
 fi
 
@@ -78,7 +79,7 @@ echo "Current branch: $(git branch --show-current)"
 
 # Create RELEASE_VERSION_BRANCH based on RELEASE_BRANCH and push to origin
 git checkout -b "$RELEASE_VERSION_BRANCH"
-git push origin "$RELEASE_VERSION_BRANCH"
+git push origin HEAD:"$RELEASE_VERSION_BRANCH"
 echo "Created and pushed $RELEASE_VERSION_BRANCH based on $RELEASE_BRANCH"
 
 echo "Successfully set up $RELEASE_VERSION_BRANCH - working directory now points to this branch"
