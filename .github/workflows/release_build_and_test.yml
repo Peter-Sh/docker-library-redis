@@ -7,11 +7,11 @@ on:
 
 jobs:
   build-and-test:
-  runs-on: ["self-hosted"]
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Ensure Release Branch
-      uses: ./.github/ensure-release-branch
-      with:
-        release_tag: ${{ github.event.inputs.release_tag }}
+    runs-on: ["self-hosted"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Ensure Release Branch
+        uses: ./.github/ensure-release-branch
+        with:
+          release_tag: ${{ github.event.inputs.release_tag }}
