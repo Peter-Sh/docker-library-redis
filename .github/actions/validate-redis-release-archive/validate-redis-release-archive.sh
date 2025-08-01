@@ -19,7 +19,7 @@ echo "REDIS_ARCHIVE_URL: $REDIS_ARCHIVE_URL"
 # Download the Redis archive
 TEMP_ARCHIVE="/tmp/redis-${TAG}.tar.gz"
 echo "Downloading Redis archive to $TEMP_ARCHIVE..."
-if ! curl -sfiL -o "$TEMP_ARCHIVE" "$REDIS_ARCHIVE_URL"; then
+if ! curl -sfL -o "$TEMP_ARCHIVE" "$REDIS_ARCHIVE_URL"; then
     echo "Error: Failed to download Redis archive from $REDIS_ARCHIVE_URL"
     exit 1
 fi
