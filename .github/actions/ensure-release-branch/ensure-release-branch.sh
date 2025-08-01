@@ -68,7 +68,7 @@ echo "RELEASE_BRANCH: $RELEASE_BRANCH"
 execute_command git ls-remote --heads origin "$RELEASE_BRANCH"
 if echo "$last_cmd_stdout" | grep -q "$RELEASE_BRANCH"; then
     echo "Branch $RELEASE_BRANCH exists in origin"
-    execute_command git fetch origin "$RELEASE_BRANCH"
+    execute_command git fetch --unshallow origin "$RELEASE_BRANCH"
 else
     echo "Branch $RELEASE_BRANCH does not exist in origin, need to create it"
     if [ -z "$ALLOW_MODIFY" ]; then
@@ -92,7 +92,7 @@ else
     echo "Using base branch: $BASE_BRANCH"
 
     # Create new branch based on base branch and push to origin
-    execute_command git fetch origin "$BASE_BRANCH"
+    execute_command git fetch --unshallow origin "$BASE_BRANCH"
     execute_command git checkout -b "$RELEASE_BRANCH" "origin/$BASE_BRANCH"
     execute_command git push origin HEAD:"$RELEASE_BRANCH"
     echo "Created and pushed $RELEASE_BRANCH based on $BASE_BRANCH"
@@ -101,13 +101,13 @@ fi
 # Check if RELEASE_VERSION_BRANCH exists in origin
 execute_command git ls-remote --heads origin "$RELEASE_VERSION_BRANCH"
 if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
-    execute_command git fetch origin "$RELEASE_VERSION_BRANCH"
+    execute_command git fetch --unshallow origin "$RELEASE_VERSION_BRANCH"
     execute_command git checkout "$RELEASE_VERSION_BRANCH"
     echo "Successfully checked out to $RELEASE_VERSION_BRANCH"
 
     # Check if there are changes in release branch that are not in release version branch
     echo "Checking for differences between $RELEASE_BRANCH and $RELEASE_VERSION_BRANCH..."
-    execute_command git fetch origin "$RELEASE_BRANCH"
+    execute_command git fetch --unshallow origin "$RELEASE_BRANCH"
 
     # Compare the two branches to see if there are commits in release branch not in release version branch
     execute_command git rev-list --count "origin/$RELEASE_VERSION_BRANCH..origin/$RELEASE_BRANCH"
