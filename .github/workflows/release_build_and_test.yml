@@ -29,9 +29,10 @@ jobs:
           release_tag: ${{ github.event.inputs.release_tag }}
 
   build-and-test:
-    needs: prepare-release
     runs-on: ["ubuntu-latest"]
-    use: pre-merge.yml
+    needs: prepare-release
+    uses: ./.github/workflows/pre-merge.yml
+    secrets: inherit
     with:
       release_tag: ${{ github.event.inputs.release_tag }}
 
