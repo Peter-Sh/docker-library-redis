@@ -28,10 +28,10 @@ jobs:
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
 
-    build-and-test:
-      needs: prepare-release
-      runs-on: ["ubuntu-latest"]
-      use: pre-merge.yml
-      with:
-        release_tag: ${{ github.event.inputs.release_tag }}
+  build-and-test:
+    needs: prepare-release
+    runs-on: ["ubuntu-latest"]
+    use: pre-merge.yml
+    with:
+      release_tag: ${{ github.event.inputs.release_tag }}
 
