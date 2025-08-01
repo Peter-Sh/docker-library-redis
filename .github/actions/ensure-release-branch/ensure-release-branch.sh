@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# This script ensures that a release branch and release version branch exist for a given release tag.
+# It creates and pushes both branches if they do not exist.
+# It also checks out the release version branch at the end.
+# https://redislabs.atlassian.net/wiki/spaces/RED/pages/5293342875/Redis+OSS+release+automation
+
 set -e
 #set -x
 
@@ -13,7 +19,7 @@ VERBOSITY=1
 
 SCRIPT_DIR="$(dirname -- "$( readlink -f -- "$0"; )")"
 # shellcheck disable=SC1091
-. "$SCRIPT_DIR/helpers.sh"
+. "$SCRIPT_DIR/../common/helpers.sh"
 
 # Input TAG is expected in $1
 TAG="$1"
