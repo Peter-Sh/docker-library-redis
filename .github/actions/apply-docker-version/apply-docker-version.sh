@@ -78,10 +78,8 @@ fi
 # Commit changes if any files were modified
 if [ "$files_modified" = true ]; then
     echo "Files were modified, committing changes..."
-    git config user.email "relesase-bot@redis.com"
-    git config user.name "Release Bot"
     git add debian/Dockerfile alpine/Dockerfile
-    git commit -m "$TAG"
+    git commit -m "$TAG" --author "Redis Release Bot <redis-release-bot@redis.com>"
     echo "Changes committed with message: $TAG"
 else
     echo "No files were modified, nothing to commit"
