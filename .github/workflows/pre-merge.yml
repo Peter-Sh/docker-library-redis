@@ -9,6 +9,7 @@ on:
       release_tag:
         description: 'Release tag to build'
         required: true
+        type: string
 
 jobs:
   build-and-test:
