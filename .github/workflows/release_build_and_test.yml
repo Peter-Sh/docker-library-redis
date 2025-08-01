@@ -1,3 +1,9 @@
+# This worjflow is a part of release automation process.
+# It is intended to be run with workflow_dispatch event by the automation.
+
+# Warning: Workflow does switch branches and this may lead to confusion when changing workflow actions.
+# The usual safety rule is to make changes to workflow or actions in base branch (e.g, release/8.X)
+# Version branches (e.g, 8.0.10-rc5-int8) will merge changes from base branch automatically.
 on:
   workflow_dispatch:
     inputs:
@@ -33,5 +39,5 @@ jobs:
     uses: ./.github/workflows/pre-merge.yml
     secrets: inherit
     with:
-      release_tag: ${{ github.event.inputs.release_tag }}
+      release_tag: ${{ inputs.release_tag }}
 

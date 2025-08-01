@@ -127,23 +127,6 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
 
         echo "Attempting to merge changes from $RELEASE_BRANCH into $RELEASE_VERSION_BRANCH..."
         # Try to merge the release branch into the current release version branch
-        echo origin/$RELEASE_BRANCH
-        git log --graph --decorate -5 origin/$RELEASE_BRANCH
-
-        echo origin/$RELEASE_VERSION_BRANCH
-        git log --graph --decorate -5 origin/$RELEASE_VERSION_BRANCH
-
-        echo $RELEASE_BRANCH
-        git log --graph --decorate -5 $RELEASE_BRANCH
-
-        echo $RELEASE_VERSION_BRANCH
-        git log --graph --decorate -5 $RELEASE_VERSION_BRANCH
-
-        echo "HEAD"
-        git log --graph --decorate -5
-
-        git config user.email "relesase-bot@redis.com"
-        git config user.name "Release Bot"
         execute_command git merge "origin/$RELEASE_BRANCH" --no-edit
         # Push the merged changes to origin
         execute_command git push origin "$RELEASE_VERSION_BRANCH"
