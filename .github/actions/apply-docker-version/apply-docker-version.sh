@@ -81,7 +81,7 @@ if [ "$files_modified" = true ]; then
     git config user.email "relesase-bot@redis.com"
     git config user.name "Release Bot"
     git add debian/Dockerfile alpine/Dockerfile
-    git config --list --show-origin
+    git diff --cached
     git commit -m "$TAG"
     echo "Changes committed with message: $TAG"
 else
