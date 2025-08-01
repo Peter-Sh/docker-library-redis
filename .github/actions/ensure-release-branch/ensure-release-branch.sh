@@ -142,6 +142,8 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
         echo "HEAD"
         git log --graph --decorate -5
 
+        git config user.email "relesase-bot@redis.com"
+        git config user.name "Release Bot"
         execute_command git merge "origin/$RELEASE_BRANCH" --no-edit
         # Push the merged changes to origin
         execute_command git push origin "$RELEASE_VERSION_BRANCH"
