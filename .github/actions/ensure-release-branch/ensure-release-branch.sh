@@ -1,12 +1,12 @@
 #!/bin/bash
+set -e
+#set -x
 
 # This script ensures that a release branch and release version branch exist for a given release tag.
 # It creates and pushes both branches if they do not exist.
 # It also checks out the release version branch at the end.
 # https://redislabs.atlassian.net/wiki/spaces/RED/pages/5293342875/Redis+OSS+release+automation
 
-set -e
-#set -x
 
 # shellcheck disable=SC2034
 last_cmd_stdout=""
@@ -17,17 +17,43 @@ last_cmd_result=0
 # shellcheck disable=SC2034
 VERBOSITY=1
 
+
 SCRIPT_DIR="$(dirname -- "$( readlink -f -- "$0"; )")"
 # shellcheck disable=SC1091
 . "$SCRIPT_DIR/../common/helpers.sh"
 
-# Input TAG is expected in $1
-TAG="$1"
+# Parse arguments
+CREATE=""
+TAG=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --create)
+            CREATE=1
+            shift
+            ;;
+        -*)
+            echo "Error: Unknown option $1"
+            exit 1
+            ;;
+        *)
+            if [ -z "$TAG" ]; then
+                TAG="$1"
+            else
+                echo "Error: Multiple TAG arguments provided"
+                exit 1
+            fi
+            shift
+            ;;
+    esac
+done
 
 if [ -z "$TAG" ]; then
-    echo "Error: TAG is required as first argument"
+    echo "Error: TAG is required as argument"
+    echo "Usage: $0 [--no-write] <TAG>"
     exit 1
 fi
+
 # Define RELEASE_VERSION_BRANCH which is the same as TAG
 RELEASE_VERSION_BRANCH="$TAG"
 
@@ -44,6 +70,10 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
 fi
 
 echo "Branch $RELEASE_VERSION_BRANCH does not exist in origin"
+if [ -z "$CREATE" ]; then
+    echo "Refuse to modify repository without --create option"
+    exit 1
+fi
 
 # Detect RELEASE_BRANCH name (release/X.Y format)
 RELEASE_BRANCH="release/$(echo "$TAG" | grep -Po '^\d+\.\d+')"
