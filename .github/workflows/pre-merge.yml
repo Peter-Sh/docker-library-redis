@@ -4,7 +4,7 @@ on:
     branches:
       - master
       - release/*
-  workflow_dispatch:
+  workflow_call:
     inputs:
       release_tag:
         description: 'Release tag to build'
@@ -43,7 +43,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Ensure release branch
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'workflow_call' }}
         uses: ./.github/actions/ensure-release-branch
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
