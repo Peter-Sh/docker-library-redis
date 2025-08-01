@@ -44,10 +44,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Ensure release branch
-        if: ${{ github.event_name == 'workflow_call' }}
+        if: ${{ inputs.release_tag }}
         uses: ./.github/actions/ensure-release-branch
         with:
-          release_tag: ${{ github.event.inputs.release_tag }}
+          release_tag: ${{ inputs.release_tag }}
       - uses: ./.github/actions/build-and-tag-locally
         with:
           distribution: ${{ matrix.distribution }}
