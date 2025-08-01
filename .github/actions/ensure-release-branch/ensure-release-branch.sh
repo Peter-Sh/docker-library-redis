@@ -122,24 +122,10 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
         fi
 
         echo "Attempting to merge changes from $RELEASE_BRANCH into $RELEASE_VERSION_BRANCH..."
-
         # Try to merge the release branch into the current release version branch
         execute_command git merge "origin/$RELEASE_BRANCH" --no-edit
-        if [ $last_cmd_result -eq 0 ]; then
-            echo "Successfully merged changes from $RELEASE_BRANCH"
-
-            # Push the merged changes to origin
-            execute_command git push origin "$RELEASE_VERSION_BRANCH"
-            if [ $last_cmd_result -eq 0 ]; then
-                echo "Successfully pushed merged changes to origin/$RELEASE_VERSION_BRANCH"
-            else
-                echo "Error: Failed to push merged changes to origin"
-                exit 1
-            fi
-        else
-            echo "Error: Merge failed. There may be conflicts that need manual resolution."
-            exit 1
-        fi
+        # Push the merged changes to origin
+        execute_command git push origin "$RELEASE_VERSION_BRANCH"
     fi
 
     exit 0
