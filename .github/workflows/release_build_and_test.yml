@@ -11,6 +11,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Validate Redis Release Archive
+        uses: ./.github/actions/validate-redis-release-archive
+        with:
+          release_tag: ${{ github.event.inputs.release_tag }}
+
       - name: Ensure Release Branch
         uses: ./.github/actions/ensure-release-branch
         with:
