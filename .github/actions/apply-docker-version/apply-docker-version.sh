@@ -78,6 +78,8 @@ fi
 # Commit changes if any files were modified
 if [ "$files_modified" = true ]; then
     echo "Files were modified, committing changes..."
+    git config --global user.email "relesase-bot@redis.com"
+    git config --global user.name "Release Bot"
     git add debian/Dockerfile alpine/Dockerfile
     git commit -m "$TAG"
     echo "Changes committed with message: $TAG"
