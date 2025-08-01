@@ -6,7 +6,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Ensure Release Branch
+    - name: Configure Git Commiter
+      uses: ./.github/actions/configure_git_commiter
+    - name: Apply docker version
       shell: bash
       run: |
         ${{ github.action_path }}/apply-docker-version.sh ${{ inputs.release_tag }}
