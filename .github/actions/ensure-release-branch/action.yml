@@ -2,6 +2,9 @@ inputs:
   release_tag:
     description: 'Release tag to build'
     required: true
+  allow_modify:
+    description: 'Allow modifying the repository'
+    default: false
 
 runs:
   using: "composite"
@@ -9,4 +12,4 @@ runs:
     - name: Ensure Release Branch
       shell: bash
       run: |
-        ${{ github.action_path }}/ensure-release-branch.sh ${{ inputs.release_tag }}
+        ${{ github.action_path }}/ensure-release-branch.sh ${{ inputs.allow_modify == 'true' && '--allow-modify' || '' }} ${{ inputs.release_tag }}

@@ -4,9 +4,11 @@ on:
     branches:
       - master
       - release/*
-  push:
-    branches:
-      - release/8.2
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to build'
+        required: true
 
 jobs:
   build-and-test:
@@ -40,6 +42,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Ensure release branch
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: ./.github/actions/ensure-release-branch
+        with:
+          release_tag: ${{ github.event.inputs.release_tag }}
       - uses: ./.github/actions/build-and-tag-locally
         with:
           distribution: ${{ matrix.distribution }}

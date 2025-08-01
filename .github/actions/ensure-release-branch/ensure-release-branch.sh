@@ -3,7 +3,7 @@ set -e
 #set -x
 
 # This script ensures that a release branch and release version branch exist for a given release tag.
-# It creates and pushes both branches if they do not exist.
+# It allow-modifys and pushes both branches if they do not exist.
 # It also checks out the release version branch at the end.
 # https://redislabs.atlassian.net/wiki/spaces/RED/pages/5293342875/Redis+OSS+release+automation
 
@@ -23,13 +23,13 @@ SCRIPT_DIR="$(dirname -- "$( readlink -f -- "$0"; )")"
 . "$SCRIPT_DIR/../common/helpers.sh"
 
 # Parse arguments
-CREATE=""
+ALLOW_MODIFY=""
 TAG=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --create)
-            CREATE=1
+        --allow-modify)
+            ALLOW_MODIFY=1
             shift
             ;;
         -*)
@@ -50,7 +50,7 @@ done
 
 if [ -z "$TAG" ]; then
     echo "Error: TAG is required as argument"
-    echo "Usage: $0 [--no-write] <TAG>"
+    echo "Usage: $0 [--allow-modify] <TAG>"
     exit 1
 fi
 
@@ -70,8 +70,8 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
 fi
 
 echo "Branch $RELEASE_VERSION_BRANCH does not exist in origin"
-if [ -z "$CREATE" ]; then
-    echo "Refuse to modify repository without --create option"
+if [ -z "$ALLOW_MODIFY" ]; then
+    echo "Refuse to modify repository without --allow-modify option"
     exit 1
 fi
 

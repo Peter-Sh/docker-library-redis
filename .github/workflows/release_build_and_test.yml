@@ -6,7 +6,7 @@ on:
         required: true
 
 jobs:
-  build-and-test:
+  prepare-release:
     runs-on: ["ubuntu-latest"]
     steps:
       - name: Checkout code
@@ -21,8 +21,17 @@ jobs:
         uses: ./.github/actions/ensure-release-branch
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
+          allow_modify: true
 
       - name: Apply Docker Version
         uses: ./.github/actions/apply-docker-version
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
+
+    build-and-test:
+      needs: prepare-release
+      runs-on: ["ubuntu-latest"]
+      use: pre-merge.yml
+      with:
+        release_tag: ${{ github.event.inputs.release_tag }}
+
