@@ -13,24 +13,24 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate Redis Release Archive
-        uses: ./.github/actions/validate-redis-release-archive@Peter-Sh_release_automation_RED-165688
+        uses: ./.github/actions/validate-redis-release-archive
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
 
       - name: Ensure Release Branch
-        uses: ./.github/actions/ensure-release-branch@Peter-Sh_release_automation_RED-165688
+        uses: ./.github/actions/ensure-release-branch
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
           allow_modify: true
 
       - name: Apply Docker Version
-        uses: ./.github/actions/apply-docker-version@Peter-Sh_release_automation_RED-165688
+        uses: ./.github/actions/apply-docker-version
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
 
   build-and-test:
     needs: prepare-release
-    uses: ./.github/workflows/pre-merge.yml@Peter-Sh_release_automation_RED-165688
+    uses: ./.github/workflows/pre-merge.yml
     secrets: inherit
     with:
       release_tag: ${{ github.event.inputs.release_tag }}
