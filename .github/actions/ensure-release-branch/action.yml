@@ -6,12 +6,18 @@ inputs:
     description: 'Allow modifying the repository'
     default: false
 
+outputs:
+  release_version_branch:
+    description: 'The release version branch name'
+    value: ${{ steps.ensure-branch.outputs.release_version_branch }}
+
 runs:
   using: "composite"
   steps:
     - name: Conigure Git Commiter
       uses: ./.github/actions/configure_git_commiter
     - name: Ensure Release Branch
+      id: ensure-branch
       shell: bash
       run: |
         ${{ github.action_path }}/ensure-release-branch.sh ${{ inputs.allow_modify == 'true' && '--allow-modify' || '' }} ${{ inputs.release_tag }}
