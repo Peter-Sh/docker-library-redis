@@ -24,6 +24,7 @@ jobs:
           release_tag: ${{ github.event.inputs.release_tag }}
 
       - name: Ensure Release Branch
+        id: ensure-branch
         uses: ./.github/actions/ensure-release-branch
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
@@ -33,6 +34,7 @@ jobs:
         uses: ./.github/actions/apply-docker-version
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
+          release_version_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
 
   build-and-test:
     needs: prepare-release
