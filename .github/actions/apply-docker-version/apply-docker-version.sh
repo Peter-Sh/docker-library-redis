@@ -77,29 +77,36 @@ update_dockerfile() {
     fi
 }
 
-# Track if any files were modified
-files_modified=false
+# Track which files were modified
+changed_files=()
 
 # Update debian/Dockerfile
 if update_dockerfile "debian/Dockerfile"; then
-    files_modified=true
+    changed_files+=("debian/Dockerfile")
 fi
 
 # Update alpine/Dockerfile
 if update_dockerfile "alpine/Dockerfile"; then
-    files_modified=true
+    changed_files+=("alpine/Dockerfile")
 fi
 
-# Commit changes if any files were modified
-if [ "$files_modified" = true ]; then
-    echo "Files were modified, committing changes..."
-    git add debian/Dockerfile alpine/Dockerfile
-    git diff --cached
-    execute_command git commit -m "$TAG"
-    execute_command git push origin "$TAG"
-    echo "Changes committed with message: $TAG"
+# Output the list of changed files for GitHub Actions
+if [ ${#changed_files[@]} -gt 0 ]; then
+    echo "Files were modified:"
+    printf '%s\n' "${changed_files[@]}"
+
+    # Set GitHub Actions output
+    changed_files_output=$(printf '%s\n' "${changed_files[@]}")
+    {
+        echo "changed_files<<EOF"
+        echo "$changed_files_output"
+        echo "EOF"
+    } >> "$GITHUB_OUTPUT"
+
+    echo "Changed files output set for next step"
 else
-    echo "No files were modified, nothing to commit"
+    echo "No files were modified"
+    echo "changed_files=" >> "$GITHUB_OUTPUT"
 fi
 
 echo "Docker version update completed"
