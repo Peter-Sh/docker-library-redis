@@ -3,12 +3,23 @@ inputs:
     description: 'Release tag to build'
     required: true
 
+outputs:
+  changed_files:
+    description: 'List of files that were modified'
+    value: ${{ steps.apply-version.outputs.changed_files }}
+
 runs:
   using: "composite"
   steps:
-    - name: Configure Git Commiter
-      uses: ./.github/actions/configure_git_commiter
     - name: Apply docker version
+      id: apply-version
       shell: bash
       run: |
         ${{ github.action_path }}/apply-docker-version.sh ${{ inputs.release_tag }}
+
+    - name: Create verified commit
+      if: steps.apply-version.outputs.changed_files != ''
+      uses: iarekylew00t/verified-bot-commit@v1
+      with:
+        message: ${{ inputs.release_tag }}
+        files: ${{ steps.apply-version.outputs.changed_files }}
