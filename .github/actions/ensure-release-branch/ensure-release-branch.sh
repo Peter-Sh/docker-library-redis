@@ -132,11 +132,11 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
 
         read -r -d '' PAYLOAD <<JSON
         {
-        "base": "${RELEASE_VERSION_BRANCH}",
-        "head": "${RELEASE_BRANCH}",
-        "commit_message": "Merge ${RELEASE_BRANCH} into ${RELEASE_VERSION_BRANCH} (bot)"
+            "base": "${RELEASE_VERSION_BRANCH}",
+            "head": "${RELEASE_BRANCH}",
+            "commit_message": "Merge ${RELEASE_BRANCH} into ${RELEASE_VERSION_BRANCH} (bot)"
         }
-        JSON
+JSON
 
         # Make the request and capture status code + body
         HTTP_CODE=$(curl -sS -w "%{http_code}" -o /tmp/merge.json \
