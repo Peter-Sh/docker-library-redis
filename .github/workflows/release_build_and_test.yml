@@ -34,6 +34,7 @@ jobs:
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
           allow_modify: true
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Apply Docker Version
         uses: ./.github/actions/apply-docker-version
