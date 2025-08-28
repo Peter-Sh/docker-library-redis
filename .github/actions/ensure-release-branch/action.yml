@@ -18,6 +18,8 @@ runs:
       uses: ./.github/actions/configure_git_commiter
     - name: Ensure Release Branch
       id: ensure-branch
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |
         ${{ github.action_path }}/ensure-release-branch.sh ${{ inputs.allow_modify == 'true' && '--allow-modify' || '' }} ${{ inputs.release_tag }}
