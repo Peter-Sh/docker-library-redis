@@ -229,6 +229,7 @@ runs:
 
     - name: Format registry tag
       id: format-registry-tag
+      shell: bash
       run: |
         printf "tag=%s:%s%s-%s" \
           "${{ inputs.registry_repository }}" \
