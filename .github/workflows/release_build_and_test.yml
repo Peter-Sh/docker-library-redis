@@ -43,7 +43,6 @@ jobs:
 
   build-and-test:
     needs: prepare-release
-    if: false
     uses: ./.github/workflows/pre-merge.yml
     secrets: inherit
     with:
