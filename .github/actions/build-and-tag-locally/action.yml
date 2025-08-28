@@ -233,6 +233,6 @@ runs:
       with:
         context: ${{ inputs.distribution }}
         push: true
-        tags: ${{ inputs.registry_repository }}:${{ inputs.release_tag != '' && format('{0}-', inputs.release_tag || '' }}${{ github.sha }}-${{ inputs.distribution }}
+        tags: ${{ inputs.registry_repository }}:${{ inputs.release_tag != '' && format('{0}-', inputs.release_tag || '') }}${{ github.sha }}-${{ inputs.distribution }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
