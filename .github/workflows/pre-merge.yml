@@ -15,6 +15,7 @@ jobs:
   build-and-test:
     runs-on: ${{ contains(matrix.platform, 'arm64') && 'ubuntu24-arm64-2-8' || 'ubuntu-latest' }}
     strategy:
+      fail-fast: false
       matrix:
         distribution:
           - debian
