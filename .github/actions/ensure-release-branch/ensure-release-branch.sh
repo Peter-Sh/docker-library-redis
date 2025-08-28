@@ -124,7 +124,7 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
         # debug
         set -x
         echo "Found $COMMITS_BEHIND commit(s) in $RELEASE_BRANCH that are not in $RELEASE_VERSION_BRANCH"
-        execute_command git log "origin/$RELEASE_VERSION_BRANCH..origin/$RELEASE_BRANCH"
+        execute_command git log --oneline "origin/$RELEASE_VERSION_BRANCH..origin/$RELEASE_BRANCH"
         console_output 1 gray "Commits mising:"
         console_output 1 gray "$last_cmd_stdout"
 
