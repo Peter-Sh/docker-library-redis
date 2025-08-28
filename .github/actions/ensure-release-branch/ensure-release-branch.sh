@@ -132,6 +132,7 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
             echo "Changes detected but refusing to merge without --allow-modify option"
             exit 1
         fi
+
         # Create a verified merge commit on GitHub (RELEASE_BRANCH -> RELEASE_VERSION_BRANCH)
         API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/merges"
 
