@@ -22,7 +22,7 @@ runs:
     - name: Ensure Release Branch
       id: ensure-branch
       env:
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
       shell: bash
       run: |
         ${{ github.action_path }}/ensure-release-branch.sh ${{ inputs.allow_modify == 'true' && '--allow-modify' || '' }} ${{ inputs.release_tag }}
