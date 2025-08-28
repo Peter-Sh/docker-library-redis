@@ -46,5 +46,5 @@ jobs:
     uses: ./.github/workflows/pre-merge.yml
     secrets: inherit
     with:
-      release_tag: ${{ inputs.release_tag }}
+      release_tag: ${{ github.event.inputs.release_tag }}
 
