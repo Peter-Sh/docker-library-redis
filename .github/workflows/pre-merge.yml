@@ -55,4 +55,4 @@ jobs:
           registry_username: ${{ vars.REGISTRY_REPOSITORY == 'ghcr.io' && github.actor || vars.REGISTRY_USERNAME }}
           registry_password: ${{ vars.REGISTRY_REPOSITORY == 'ghcr.io' && secrets.GITHUB_TOKEN || secrets.REGISTRY_PASSWORD }}
           publish_image: ${{ vars.PUBLISH_IMAGE }}
-          registry_repository: ${{ vars.REGISTRY_REPOSITORY }}
+          registry_repository: ${{ vars.REGISTRY_REPOSITORY == 'ghcr.io' && format('ghcr.io/{0}', github.repository) || vars.REGISTRY_REPOSITORY }}
