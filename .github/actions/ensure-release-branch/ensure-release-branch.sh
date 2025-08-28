@@ -121,6 +121,7 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
     COMMITS_BEHIND=$(echo "$last_cmd_stdout" | tr -d '[:space:]')
 
     if [ "$COMMITS_BEHIND" -gt 0 ]; then
+        # debug
         set -x
         echo "Found $COMMITS_BEHIND commit(s) in $RELEASE_BRANCH that are not in $RELEASE_VERSION_BRANCH"
         execute_command git log "origin/$RELEASE_VERSION_BRANCH..origin/$RELEASE_BRANCH"
