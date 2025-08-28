@@ -14,7 +14,7 @@ on:
         description: 'Optional UUID to identify this workflow run'
         required: false
 
-run-name: "Release Build and Test ${{ github.event.inputs.workflow_uuid && format(' {0}', github.event.inputs.workflow_uuid) || '' }}"
+run-name: "Release Build and Test${{ github.event.inputs.workflow_uuid && format(': {0}', github.event.inputs.workflow_uuid) || '' }}"
 
 jobs:
   prepare-release:
