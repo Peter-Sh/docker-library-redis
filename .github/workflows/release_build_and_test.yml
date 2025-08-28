@@ -10,9 +10,13 @@ on:
       release_tag:
         description: 'Release tag to build'
         required: true
+      workflow_uuid:
+        description: 'Optional UUID to identify this workflow run'
+        required: false
 
 jobs:
   prepare-release:
+    name: ${{ github.event.inputs.workflow_uuid && format('prepare-release {0}', github.event.inputs.workflow_uuid) || 'prepare-release' }}
     runs-on: ["ubuntu-latest"]
     steps:
       - name: Checkout code
