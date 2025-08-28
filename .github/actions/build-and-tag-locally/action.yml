@@ -19,6 +19,9 @@ inputs:
   registry_repository:
     description: 'Repository to push the image to'
     required: false
+  release_tag:
+    description: 'Release tag to build'
+    required: false
 
 runs:
   using: "composite"
@@ -102,7 +105,7 @@ runs:
       shell: bash
       run: |
         docker save -o /tmp/image-${{ steps.platform.outputs.display_name }}.tar ${{ github.sha }}:${{ steps.platform.outputs.display_name }}
-    
+
     - name: Upload image
       uses: actions/upload-artifact@v4
       with:
@@ -115,7 +118,7 @@ runs:
       if: ${{ contains(fromJSON('["amd64", "i386", "arm64"]'), steps.platform.outputs.display_name) }}
       run: |
         docker run -d --name sanity-test-${{ steps.platform.outputs.display_name }} ${{ github.sha }}:${{ steps.platform.outputs.display_name }}
-    
+
     - name: Container Logs
       if: ${{ contains(fromJSON('["amd64", "i386", "arm64"]'), steps.platform.outputs.display_name) }}
       shell: bash
@@ -128,7 +131,7 @@ runs:
       run: |
         docker exec sanity-test-${{ steps.platform.outputs.display_name }} redis-cli ping
         docker exec sanity-test-${{ steps.platform.outputs.display_name }} redis-cli info server
-  
+
     - name: Verify installed modules
       if: ${{ contains(fromJSON('["amd64", "arm64"]'), steps.platform.outputs.display_name) }}
       shell: bash
@@ -148,7 +151,7 @@ runs:
           echo "The following modules are missing: ${missing_modules[*]}"
           exit 1
         fi
-  
+
     - name: Test RedisBloom
       if: ${{ contains(fromJSON('["amd64", "arm64"]'), steps.platform.outputs.display_name) }}
       shell: bash
@@ -158,7 +161,7 @@ runs:
         [ "$(docker exec sanity-test-${{ steps.platform.outputs.display_name }} redis-cli BF.EXISTS popular_keys "redis:hash")" = "1" ] || { echo "RedisBloom test failed: 'redis:hash' not found"; exit 1; }
         [ "$(docker exec sanity-test-${{ steps.platform.outputs.display_name }} redis-cli BF.EXISTS popular_keys "redis:list")" = "0" ] || { echo "RedisBloom test failed: 'redis:list' found unexpectedly"; exit 1; }
         echo "RedisBloom test passed successfully"
-      
+
     - name: Test RediSearch
       if: ${{ contains(fromJSON('["amd64", "arm64"]'), steps.platform.outputs.display_name) }}
       shell: bash
@@ -230,6 +233,6 @@ runs:
       with:
         context: ${{ inputs.distribution }}
         push: true
-        tags: ${{ inputs.registry_repository }}:${{ github.sha }}-${{ inputs.distribution }}
+        tags: ${{ inputs.registry_repository }}:${{ inputs.release_tag != '' && format('{0}-', inputs.release_tag || '' }}${{ github.sha }}-${{ inputs.distribution }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
