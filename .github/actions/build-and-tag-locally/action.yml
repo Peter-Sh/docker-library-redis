@@ -227,12 +227,22 @@ runs:
         path: test/report-entrypoint.xml
         reporter: java-junit
 
+    - name: Format registry tag
+      id: format-registry-tag
+      run: |
+        printf "tag=%s:%s%s-%s" \
+          "${{ inputs.registry_repository }}" \
+          "${{ inputs.release_tag != '' && format('{0}-', inputs.release_tag || '') }}" \
+          "${{ github.sha }}" \
+          "${{ inputs.distribution }}" \
+          | tr '[:upper:]' '[:lower:]' >> "$GITHUB_OUTPUT"
+
     - name: Push image
       uses: docker/build-push-action@v6
       if: ${{ inputs.publish_image == 'true' && contains(fromJSON('["amd64", "arm64"]'), steps.platform.outputs.display_name) }}
       with:
         context: ${{ inputs.distribution }}
         push: true
-        tags: ${{ inputs.registry_repository }}:${{ inputs.release_tag != '' && format('{0}-', inputs.release_tag || '') }}${{ github.sha }}-${{ inputs.distribution }}
+        tags: ${{ steps.format-registry-tag.outputs.tag }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
