@@ -135,6 +135,7 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
         # Create a verified merge commit on GitHub (RELEASE_BRANCH -> RELEASE_VERSION_BRANCH)
         API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/merges"
 
+        echo gh_token=$(gh auth token)
         PAYLOAD="{\"base\":\"${RELEASE_VERSION_BRANCH}\",\"head\":\"${RELEASE_BRANCH}\",\"commit_message\":\"Merge ${RELEASE_BRANCH} into ${RELEASE_VERSION_BRANCH} (bot)\"}"
         echo "$PAYLOAD"
 
