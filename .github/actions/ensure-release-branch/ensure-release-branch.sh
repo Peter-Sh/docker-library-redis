@@ -127,12 +127,37 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
             echo "Changes detected but refusing to merge without --allow-modify option"
             exit 1
         fi
+        # Create a verified merge commit on GitHub (RELEASE_BRANCH -> RELEASE_VERSION_BRANCH)
+        API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/merges"
 
-        echo "Attempting to merge changes from $RELEASE_BRANCH into $RELEASE_VERSION_BRANCH..."
-        # Try to merge the release branch into the current release version branch
-        execute_command git merge "origin/$RELEASE_BRANCH" --no-edit
-        # Push the merged changes to origin
-        execute_command git push origin "$RELEASE_VERSION_BRANCH"
+        read -r -d '' PAYLOAD <<JSON
+        {
+        "base": "${RELEASE_VERSION_BRANCH}",
+        "head": "${RELEASE_BRANCH}",
+        "commit_message": "Merge ${RELEASE_BRANCH} into ${RELEASE_VERSION_BRANCH} (bot)"
+        }
+        JSON
+
+        # Make the request and capture status code + body
+        HTTP_CODE=$(curl -sS -w "%{http_code}" -o /tmp/merge.json \
+        -X POST \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        "$API_URL" \
+        -d "$PAYLOAD")
+
+        case "$HTTP_CODE" in
+            201) echo "✅ Verified merge created: $(jq -r '.sha' /tmp/merge.json)";;
+            204) echo "✔️  Already up to date (no merge necessary)";;
+            409) echo "❌ Merge conflict; open a PR to resolve"; cat /tmp/merge.json; exit 1;;
+            *)   echo "❌ Unexpected status $HTTP_CODE"; cat /tmp/merge.json; exit 1;;
+        esac
+
+        # Update the runner's working copy to the server-side result (optional but handy)
+        git fetch origin
+        git checkout "${RELEASE_VERSION_BRANCH}"
+        git reset --hard "origin/${RELEASE_VERSION_BRANCH}"
     fi
 
     exit 0
