@@ -22,15 +22,15 @@ jobs:
           - alpine
         platform:
           - linux/amd64
-          - linux/i386
-          - linux/arm/v5
-          - linux/arm/v6
-          - linux/arm/v7
-          - linux/mips64le
-          - linux/ppc64le
-          - linux/s390x
-          - linux/arm64
-          - linux/riscv64
+          # - linux/i386
+          # - linux/arm/v5
+          # - linux/arm/v6
+          # - linux/arm/v7
+          # - linux/mips64le
+          # - linux/ppc64le
+          # - linux/s390x
+          # - linux/arm64
+          # - linux/riscv64
         exclude:
         - distribution: alpine
           platform: linux/mips64le
@@ -52,7 +52,7 @@ jobs:
         with:
           distribution: ${{ matrix.distribution }}
           platform: ${{ matrix.platform }}
-          registry_username: ${{ vars.REGISTRY_USERNAME }}
-          registry_password: ${{ secrets.REGISTRY_PASSWORD }}
+          registry_username: ${{ vars.REGISTRY_REPOSITORY == 'ghcr.io' && github.actor || vars.REGISTRY_USERNAME }}
+          registry_password: ${{ vars.REGISTRY_REPOSITORY == 'ghcr.io' && secrets.GITHUB_TOKEN || secrets.REGISTRY_PASSWORD }}
           publish_image: ${{ vars.PUBLISH_IMAGE }}
           registry_repository: ${{ vars.REGISTRY_REPOSITORY }}
