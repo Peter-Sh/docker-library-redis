@@ -115,7 +115,6 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
     # Check if there are changes in release branch that are not in release version branch
     echo "Checking for differences between $RELEASE_BRANCH and $RELEASE_VERSION_BRANCH..."
     execute_command git_fetch_unshallow origin "$RELEASE_BRANCH"
-
     # Compare the two branches to see if there are commits in release branch not in release version branch
     execute_command git rev-list --count "origin/$RELEASE_VERSION_BRANCH..origin/$RELEASE_BRANCH"
     COMMITS_BEHIND=$(echo "$last_cmd_stdout" | tr -d '[:space:]')
