@@ -57,38 +57,30 @@ update_dockerfile() {
     # Update REDIS_DOWNLOAD_URL
     if grep -q "^ENV REDIS_DOWNLOAD_URL=" "$dockerfile"; then
         sed -i "s|^ENV REDIS_DOWNLOAD_URL=.*|ENV REDIS_DOWNLOAD_URL=$REDIS_ARCHIVE_URL|" "$dockerfile"
-        updated=true
-        echo "  Updated REDIS_DOWNLOAD_URL"
+    else
+        echo "Cannot update $dockerfile, ENV REDIS_DOWNLOAD_URL not found"
+        return 1
     fi
+
 
     # Update REDIS_DOWNLOAD_SHA
     if grep -q "^ENV REDIS_DOWNLOAD_SHA=" "$dockerfile"; then
         sed -i "s|^ENV REDIS_DOWNLOAD_SHA=.*|ENV REDIS_DOWNLOAD_SHA=$REDIS_ARCHIVE_SHA|" "$dockerfile"
-        updated=true
-        echo "  Updated REDIS_DOWNLOAD_SHA"
-    fi
-
-    if [ "$updated" = true ]; then
-        echo "  $dockerfile updated successfully"
-        return 0
     else
-        echo "  No changes needed in $dockerfile"
+        echo "Cannot update $dockerfile, ENV REDIS_DOWNLOAD_SHA not found"
         return 1
     fi
 }
 
+docker_files=("debian/Dockerfile" "alpine/Dockerfile")
 # Track which files were modified
 changed_files=()
 
-# Update debian/Dockerfile
-if update_dockerfile "debian/Dockerfile"; then
-    changed_files+=("debian/Dockerfile")
-fi
+for dockerfile in "${docker_files[@]}"; do
+    update_dockerfile "$dockerfile"
+done
 
-# Update alpine/Dockerfile
-if update_dockerfile "alpine/Dockerfile"; then
-    changed_files+=("alpine/Dockerfile")
-fi
+changed_files=($(git diff --name-only "${docker_files[@]}"))
 
 # Output the list of changed files for GitHub Actions
 if [ ${#changed_files[@]} -gt 0 ]; then
@@ -108,5 +100,3 @@ else
     echo "No files were modified"
     echo "changed_files=" >> "$GITHUB_OUTPUT"
 fi
-
-echo "Docker version update completed"
