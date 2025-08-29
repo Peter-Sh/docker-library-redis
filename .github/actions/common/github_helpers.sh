@@ -11,8 +11,8 @@ github_create_verified_merge() {
             BASE_BRANCH="$2"
             shift
             ;;
-        -*)
-            echo "Error: Unknown option $1"
+        *)
+            echo "Error: Unknown argument $1"
             exit 1
             ;;
     esac
