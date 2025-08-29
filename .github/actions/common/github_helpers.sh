@@ -31,6 +31,7 @@ github_create_verified_merge() {
 
     PAYLOAD="{\"base\":\"${BASE_BRANCH}\",\"head\":\"${HEAD_BRANCH}\",\"commit_message\":\"Merge ${HEAD_BRANCH} into ${BASE_BRANCH} (bot)\"}"
 
+    echo "Going to debug this"
     # Make the request and capture status code + body
     HTTP_CODE=$(curl -sS -w "%{http_code}" -o /tmp/merge.json \
     -X POST \
@@ -39,6 +40,8 @@ github_create_verified_merge() {
     -H "X-GitHub-Api-Version: 2022-11-28" \
     "$API_URL" \
     -d "$PAYLOAD")
+
+    echo "HTTP_CODE: $HTTP_CODE"
 
     case "$HTTP_CODE" in
         201) echo "✅ Verified merge created: $(jq -r '.sha' /tmp/merge.json)";;
