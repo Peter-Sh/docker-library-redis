@@ -1,4 +1,5 @@
 github_create_verified_merge() {
+    set -x
     BASE_BRANCH=
     HEAD_BRANCH=
     while [[ $# -gt 0 ]]; do

@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
-
-# This script updates Redis version in Dockerfiles using environment variables
-# REDIS_ARCHIVE_URL and REDIS_ARCHIVE_SHA, then commits changes if any were made.
+set -x
 
 # shellcheck disable=SC2034
 last_cmd_stdout=""
