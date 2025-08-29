@@ -26,13 +26,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate Redis Release Archive
-        uses: ./.github/actions/validate-redis-release-archive
+        uses: redis/redis-oss-release-automation/.github/actions/validate-redis-release-archive
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
 
       - name: Ensure Release Branch
         id: ensure-branch
-        uses: ./.github/actions/ensure-release-branch
+        uses: redis/redis-oss-release-automation/.github/actions/ensure-release-branch
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
           allow_modify: true
@@ -69,14 +69,14 @@ jobs:
 
       - name: Ensure Release Branch
         id: ensure-branch
-        uses: ./.github/actions/ensure-release-branch
+        uses: redis/redis-oss-release-automation/.github/actions/ensure-release-branch
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
           allow_modify: false
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge back to release branch
-        uses: ./.github/actions/merge-branches-verified
+        uses: redis/redis-oss-release-automation/.github/actions/merge-branches-verified
         with:
           from_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
           to_branch: ${{ steps.ensure-branch.outputs.release_branch }}
