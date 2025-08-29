@@ -49,7 +49,7 @@ jobs:
         with:
           release_tag: ${{ inputs.release_tag }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: redis/redis-oss-release-automation/.github/actions/build-and-tag-locally@main
+      - uses: ./.github/actions/build-and-tag-locally
         with:
           distribution: ${{ matrix.distribution }}
           platform: ${{ matrix.platform }}
