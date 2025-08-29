@@ -63,7 +63,6 @@ fi
 # Define RELEASE_VERSION_BRANCH which is the same as TAG
 RELEASE_VERSION_BRANCH="$TAG"
 
-# Output the release version branch for GitHub Actions
 echo "release_version_branch=$RELEASE_VERSION_BRANCH" >> "$GITHUB_OUTPUT"
 
 echo "TAG: $TAG"
@@ -72,6 +71,7 @@ echo "RELEASE_VERSION_BRANCH: $RELEASE_VERSION_BRANCH"
 # Detect RELEASE_BRANCH name (release/X.Y format)
 RELEASE_BRANCH="release/$(echo "$TAG" | grep -Po '^\d+\.\d+')"
 echo "RELEASE_BRANCH: $RELEASE_BRANCH"
+echo "release_branch=$RELEASE_BRANCH" >> "$GITHUB_OUTPUT"
 
 # Check if RELEASE_BRANCH exists in origin
 execute_command git ls-remote --heads origin "$RELEASE_BRANCH"

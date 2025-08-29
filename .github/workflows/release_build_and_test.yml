@@ -1,4 +1,4 @@
-# This worjflow is a part of release automation process.
+# This workflow is a part of release automation process.
 # It is intended to be run with workflow_dispatch event by the automation.
 
 # Warning: Workflow does switch branches and this may lead to confusion when changing workflow actions.
@@ -19,6 +19,8 @@ run-name: "Release Build and Test${{ github.event.inputs.workflow_uuid && format
 jobs:
   prepare-release:
     runs-on: ["ubuntu-latest"]
+    outputs:
+      changed_files: ${{ steps.apply-version.outputs.changed_files }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,6 +39,7 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Apply Docker Version
+        id: apply-version
         uses: ./.github/actions/apply-docker-version
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
@@ -50,3 +53,24 @@ jobs:
     with:
       release_tag: ${{ github.event.inputs.release_tag }}
 
+  merge-back-to-release-branch:
+    needs: [prepare-release, build-and-test]
+    if: success() && needs.prepare-release.outputs.changed_files != ''
+    runs-on: ["ubuntu-latest"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Ensure Release Branch
+        id: ensure-branch
+        uses: ./.github/actions/ensure-release-branch
+        with:
+          release_tag: ${{ github.event.inputs.release_tag }}
+          allow_modify: false
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge back to release branch
+        uses: ./.github/actions/merge-branches-verified
+        with:
+          from_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
+          to_branch: ${{ steps.ensure-branch.outputs.release_branch }}
