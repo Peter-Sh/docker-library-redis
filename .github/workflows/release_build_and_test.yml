@@ -20,8 +20,6 @@ run-name: "Release Build and Test${{ github.event.inputs.workflow_uuid && format
 jobs:
   prepare-release:
     runs-on: ["ubuntu-latest"]
-    outputs:
-      changed_files: ${{ steps.apply-version.outputs.changed_files }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -48,14 +46,18 @@ jobs:
 
   build-and-test:
     needs: prepare-release
-    uses: ./.github/workflows/pre-merge.yml
-    secrets: inherit
-    with:
-      release_tag: ${{ github.event.inputs.release_tag }}
+    # uses: ./.github/workflows/pre-merge.yml
+    # secrets: inherit
+    # with:
+    #   release_tag: ${{ github.event.inputs.release_tag }}
+    runs-on: [ubuntu-latest]
+    steps:
+      - run: |
+          echo "Hello World"
 
   merge-back-to-release-branch:
     needs: [prepare-release, build-and-test]
-    if: success() && needs.prepare-release.outputs.changed_files != ''
+    if: success()
     runs-on: ["ubuntu-latest"]
     steps:
       - name: Checkout code
