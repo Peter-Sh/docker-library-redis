@@ -44,4 +44,4 @@ if [ -z "$FROM_BRANCH" ] || [ -z "$TO_BRANCH" ]; then
     exit 1
 fi
 
-execute_command github_create_verified_merge --from "$FROM_BRANCH" --to "$TO_BRANCH"
+github_create_verified_merge --from "$FROM_BRANCH" --to "$TO_BRANCH"
