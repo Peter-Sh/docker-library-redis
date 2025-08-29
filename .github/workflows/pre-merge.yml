@@ -45,11 +45,11 @@ jobs:
         uses: actions/checkout@v4
       - name: Ensure release branch
         if: ${{ inputs.release_tag }}
-        uses: redis/redis-oss-release-automation/.github/actions/ensure-release-branch
+        uses: redis/redis-oss-release-automation/.github/actions/ensure-release-branch@main
         with:
           release_tag: ${{ inputs.release_tag }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: redis/redis-oss-release-automation/.github/actions/build-and-tag-locally
+      - uses: redis/redis-oss-release-automation/.github/actions/build-and-tag-locally@main
         with:
           distribution: ${{ matrix.distribution }}
           platform: ${{ matrix.platform }}
