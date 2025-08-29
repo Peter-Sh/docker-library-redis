@@ -13,11 +13,8 @@ last_cmd_result=0
 # shellcheck disable=SC2034
 VERBOSITY=1
 
-
-SCRIPT_DIR="$(dirname -- "$( readlink -f -- "$0"; )")"
 # shellcheck disable=SC1091
-. "$SCRIPT_DIR/../common/helpers.sh"
-
+. "$GITHUB_WORKSPACE/redis-oss-release-automation/.github/actions/common/helpers.sh"
 
 # Input TAG is expected in $1
 TAG="$1"

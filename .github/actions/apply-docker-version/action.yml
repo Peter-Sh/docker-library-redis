@@ -14,6 +14,13 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout common functions
+      uses: actions/checkout@v4
+      with:
+        repository: redis/redis-oss-release-automation
+        ref: main
+        path: redis-oss-release-automation
+
     - name: Apply docker version
       id: apply-version
       shell: bash
