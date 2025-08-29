@@ -1,5 +1,4 @@
 github_create_verified_merge() {
-    set -x
     BASE_BRANCH=
     HEAD_BRANCH=
     while [[ $# -gt 0 ]]; do
@@ -16,14 +15,14 @@ github_create_verified_merge() {
             ;;
         *)
             echo "Error: Unknown argument $1"
-            exit 1
+            return 1
             ;;
     esac
     done
 
     if [ -z "$BASE_BRANCH" ] || [ -z "$HEAD_BRANCH" ]; then
         echo "Error: Missing required arguments --from and --to"
-        exit 1
+        return 1
     fi
 
     # Create a verified merge commit on GitHub (HEAD_BRANCH -> BASE_BRANCH)
@@ -31,7 +30,6 @@ github_create_verified_merge() {
 
     PAYLOAD="{\"base\":\"${BASE_BRANCH}\",\"head\":\"${HEAD_BRANCH}\",\"commit_message\":\"Merge ${HEAD_BRANCH} into ${BASE_BRANCH} (bot)\"}"
 
-    echo "Going to debug this"
     # Make the request and capture status code + body
     HTTP_CODE=$(curl -sS -w "%{http_code}" -o /tmp/merge.json \
     -X POST \
@@ -41,12 +39,10 @@ github_create_verified_merge() {
     "$API_URL" \
     -d "$PAYLOAD")
 
-    echo "HTTP_CODE: $HTTP_CODE"
-
     case "$HTTP_CODE" in
         201) echo "✅ Verified merge created: $(jq -r '.sha' /tmp/merge.json)";;
         204) echo "✔️  Already up to date (no merge necessary)";;
-        409) echo "❌ Merge conflict; open a PR to resolve"; cat /tmp/merge.json; exit 1;;
-        *)   echo "❌ Unexpected status $HTTP_CODE"; cat /tmp/merge.json; exit 1;;
+        409) echo "❌ Merge conflict; open a PR to resolve"; cat /tmp/merge.json; return 1;;
+        *)   echo "❌ Unexpected status $HTTP_CODE"; cat /tmp/merge.json; return 1;;
     esac
 }

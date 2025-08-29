@@ -1,4 +1,7 @@
 inputs:
+  gh_token:
+    description: 'GitHub token to use'
+    required: true
   from_branch:
     description: 'Branch to merge from'
     required: true
@@ -8,6 +11,8 @@ inputs:
 
 runs:
   using: "composite"
+  env:
+    GITHUB_TOKEN: ${{ inputs.gh_token }}
   steps:
     - name: Do verified merge
       shell: bash
