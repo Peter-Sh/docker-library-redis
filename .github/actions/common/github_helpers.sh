@@ -6,9 +6,11 @@ github_create_verified_merge() {
         --from)
             HEAD_BRANCH="$2"
             shift
+            shift
             ;;
         --to)
             BASE_BRANCH="$2"
+            shift
             shift
             ;;
         *)
