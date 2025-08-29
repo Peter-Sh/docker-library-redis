@@ -1,6 +1,5 @@
 #!/bin/bash
-#set -e
-set -x
+set -e
 
 # shellcheck disable=SC2034
 last_cmd_stdout=""
@@ -10,7 +9,6 @@ last_cmd_stderr=""
 last_cmd_result=0
 # shellcheck disable=SC2034
 VERBOSITY=1
-
 
 SCRIPT_DIR="$(dirname -- "$( readlink -f -- "$0"; )")"
 # shellcheck disable=SC1091
@@ -44,4 +42,4 @@ if [ -z "$FROM_BRANCH" ] || [ -z "$TO_BRANCH" ]; then
     exit 1
 fi
 
-github_create_verified_merge --from "$FROM_BRANCH" --to "$TO_BRANCH"
+execute_command github_create_verified_merge --from "$FROM_BRANCH" --to "$TO_BRANCH"

@@ -1,6 +1,6 @@
 # Function to execute command from array and capture output
 execute_command() {
-# turn off errexit (set -e) if it is active and restore it later
+    # turn off errexit (set -e) if it is active and restore it later
     echo $SHELLOPTS | grep -q errexit && restore_errexit="1" && set +e || restore_errexit=""
 
     local cmd
@@ -26,12 +26,14 @@ execute_command() {
 
     # Execute command and capture output
     console_output 1 gray "Executing command: ${cmd[*]}"
+
     "${cmd[@]}" >"$stdout_file" 2>"$stderr_file"
     last_cmd_result=$?
 
     # Read captured output
     last_cmd_stdout=$(cat "$stdout_file")
     last_cmd_stderr=$(cat "$stderr_file")
+
 
     if [ "$last_cmd_result" -ne 0 ]; then
         console_output 0 red "Command failed with exit code $last_cmd_result"

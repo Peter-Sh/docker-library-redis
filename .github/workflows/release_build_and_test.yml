@@ -80,3 +80,4 @@ jobs:
         with:
           from_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
           to_branch: ${{ steps.ensure-branch.outputs.release_branch }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
