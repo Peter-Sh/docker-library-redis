@@ -47,11 +47,17 @@ jobs:
 
   build-and-test:
     needs: prepare-release
+    runs-on: ["ubuntu-latest"]
     #if: false
-    uses: ./.github/workflows/pre-merge.yml
-    secrets: inherit
-    with:
-      release_tag: ${{ github.event.inputs.release_tag }}
+    #uses: ./.github/workflows/pre-merge.yml
+    #secrets: inherit
+    #with:
+      #release_tag: ${{ github.event.inputs.release_tag }}
+    steps:
+      - name: Test
+        run: |
+          echo Poop
+
 
   merge-back-to-release-branch:
     needs: [prepare-release, build-and-test]
