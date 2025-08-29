@@ -11,10 +11,10 @@ inputs:
 
 runs:
   using: "composite"
-  env:
-    GITHUB_TOKEN: ${{ inputs.gh_token }}
   steps:
     - name: Do verified merge
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
       shell: bash
       run: |
         ${{ github.action_path }}/merge-branches-verified.sh --from ${{ inputs.from_branch }} --to ${{ inputs.to_branch }}
