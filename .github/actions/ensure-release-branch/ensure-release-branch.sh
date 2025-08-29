@@ -21,6 +21,8 @@ VERBOSITY=1
 SCRIPT_DIR="$(dirname -- "$( readlink -f -- "$0"; )")"
 # shellcheck disable=SC1091
 . "$SCRIPT_DIR/../common/helpers.sh"
+# shellcheck disable=SC1091
+. "$SCRIPT_DIR/../common/github_helpers.sh"
 
 # Parse arguments
 ALLOW_MODIFY=""
@@ -109,8 +111,6 @@ fi
 execute_command git ls-remote --heads origin "$RELEASE_VERSION_BRANCH"
 if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
     execute_command git_fetch_unshallow origin "$RELEASE_VERSION_BRANCH"
-    execute_command git checkout "$RELEASE_VERSION_BRANCH"
-    echo "Successfully checked out to $RELEASE_VERSION_BRANCH"
 
     # Check if there are changes in release branch that are not in release version branch
     echo "Checking for differences between $RELEASE_BRANCH and $RELEASE_VERSION_BRANCH..."
@@ -119,11 +119,9 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
     # Compare the two branches to see if there are commits in release branch not in release version branch
     execute_command git rev-list --count "origin/$RELEASE_VERSION_BRANCH..origin/$RELEASE_BRANCH"
     COMMITS_BEHIND=$(echo "$last_cmd_stdout" | tr -d '[:space:]')
-
     if [ "$COMMITS_BEHIND" -gt 0 ]; then
-        echo "Found $COMMITS_BEHIND commit(s) in $RELEASE_BRANCH that are not in $RELEASE_VERSION_BRANCH"
+        echo "Found $COMMITS_BEHIND commit(s) in $RELEASE_BRANCH that are not in $RELEASE_VERSION_BRANCH:"
         execute_command git log --oneline "origin/$RELEASE_VERSION_BRANCH..origin/$RELEASE_BRANCH"
-        console_output 1 gray "Commits mising:"
         console_output 1 gray "$last_cmd_stdout"
 
         if [ -z "$ALLOW_MODIFY" ]; then
@@ -131,35 +129,14 @@ if echo "$last_cmd_stdout" | grep -q "$RELEASE_VERSION_BRANCH"; then
             exit 1
         fi
 
-        # Create a verified merge commit on GitHub (RELEASE_BRANCH -> RELEASE_VERSION_BRANCH)
-        API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/merges"
-
-        PAYLOAD="{\"base\":\"${RELEASE_VERSION_BRANCH}\",\"head\":\"${RELEASE_BRANCH}\",\"commit_message\":\"Merge ${RELEASE_BRANCH} into ${RELEASE_VERSION_BRANCH} (bot)\"}"
-
-        # Make the request and capture status code + body
-        HTTP_CODE=$(curl -sS -w "%{http_code}" -o /tmp/merge.json \
-        -X POST \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        "$API_URL" \
-        -d "$PAYLOAD")
-
-        case "$HTTP_CODE" in
-            201) echo "✅ Verified merge created: $(jq -r '.sha' /tmp/merge.json)";;
-            204) echo "✔️  Already up to date (no merge necessary)";;
-            409) echo "❌ Merge conflict; open a PR to resolve"; cat /tmp/merge.json; exit 1;;
-            *)   echo "❌ Unexpected status $HTTP_CODE"; cat /tmp/merge.json; exit 1;;
-        esac
-
-        # Update the runner's working copy to the server-side result (optional but handy)
-        git fetch origin
-        git checkout "${RELEASE_VERSION_BRANCH}"
-        git reset --hard "origin/${RELEASE_VERSION_BRANCH}"
+        github_create_verified_merge --from "$RELEASE_BRANCH" --to "$RELEASE_VERSION_BRANCH"
     fi
 
-    exit 0
+    execute_command git_fetch_unshallow origin "$RELEASE_VERSION_BRANCH"
+    execute_command git checkout "${RELEASE_VERSION_BRANCH}"
+    echo "Successfully checked out to $RELEASE_VERSION_BRANCH"
 
+    exit 0
 fi
 
 echo "Branch $RELEASE_VERSION_BRANCH does not exist in origin"
