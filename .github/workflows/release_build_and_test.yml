@@ -46,14 +46,11 @@ jobs:
 
   build-and-test:
     needs: prepare-release
-    # uses: ./.github/workflows/pre-merge.yml
-    # secrets: inherit
-    # with:
-    #   release_tag: ${{ github.event.inputs.release_tag }}
-    runs-on: [ubuntu-latest]
-    steps:
-      - run: |
-          echo "Hello World"
+    uses: ./.github/workflows/pre-merge.yml
+    secrets: inherit
+    with:
+      release_tag: ${{ github.event.inputs.release_tag }}
+
 
   merge-back-to-release-branch:
     needs: [prepare-release, build-and-test]
