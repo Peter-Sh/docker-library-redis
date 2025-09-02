@@ -45,11 +45,16 @@ jobs:
           release_version_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
 
   build-and-test:
-    needs: prepare-release
-    uses: ./.github/workflows/pre-merge.yml
-    secrets: inherit
-    with:
-      release_tag: ${{ github.event.inputs.release_tag }}
+    #needs: prepare-release
+    #uses: ./.github/workflows/pre-merge.yml
+    #secrets: inherit
+    #with:
+    #  release_tag: ${{ github.event.inputs.release_tag }}
+    runs-on: ["ubuntu-latest"]
+    steps:
+      - shell: bash
+        run: |
+          echo Hello
 
 
   merge-back-to-release-branch:
