@@ -39,7 +39,12 @@ git_ls_remote_major_release_version_branches() {
 git_ls_remote_tags() {
     local remote="$1"
     local major_version="$2"
-    execute_command git ls-remote --refs --tags "$remote" "refs/tags/v$major_version.*"
+    execute_command --no-std -- git ls-remote --refs --tags "$remote" "refs/tags/v$major_version.*"
+    if [ -z "$last_cmd_stdout" ]; then
+        console_output 0 red "Error: No tags found for major_version=$major_version"
+        return 1
+    fi
+    echo "$last_cmd_stdout"
 }
 
 filter_major_release_version_branches() {
@@ -51,6 +56,51 @@ filter_major_release_version_branches() {
             echo "$ref $commit"
         fi
     done | sort -Vr
+}
+
+sort_version_tags() {
+    local major_version="$1"
+    local version_tag commit ref
+    while read -r commit ref; do
+        version_tag="$(echo "$ref" | grep -o "v$major_version\.[0-9][0-9]*\.[0-9][0-9]*.*")"
+        printf "%s %s\n" "$version_tag" "$commit"
+    done  | sort -Vr
+}
+
+filter_out_eol_versions() {
+    local major_version="$1"
+    local version_tag commit
+    local last_minor skip_minor minors
+    local major minor patch suffix
+    local versions
+
+    mapfile -t versions
+    for line in "${versions[@]}"; do
+        read -r version_tag commit < <(echo "$line")
+        IFS=: read -r major minor patch suffix < <(redis_version_split "$version_tag")
+
+        if [ "$minor" != "$last_minor" ] && [ -n "$last_minor" ]; then
+            if [ -z "$skip_minor" ]; then
+                printf "%s" "$minors"
+            else
+                console_output 2 gray "Skipping minor version $major_version.$last_minor.* due to EOL"
+            fi
+            minors=""
+            skip_minor=""
+        fi
+        last_minor="$minor"
+
+        printf -v minors "%s%s\n" "$minors" "$version_tag $commit"
+
+        if echo "$suffix" | grep -qi "-eol$"; then
+            skip_minor="$minor"
+        fi
+    done
+    if [ -z "$skip_minor" ]; then
+        printf "%s" "$minors"
+    else
+        console_output 2 gray "Skipping minor version $major_version.$last_minor.* due to EOL"
+    fi
 }
 
 filter_actual_major_redis_versions() {
@@ -127,24 +177,6 @@ extract_distro_name_from_dockerfile() {
     echo "$distro"
 }
 
-extract_redis_version_from_dockerfile() {
-    increase_indent_level
-    console_output 2 gray "Extracting redis version from dockerfile"
-    local redis_version
-    redis_version=$(grep -m1 -i '^ENV REDIS_DOWNLOAD_URL.*https*:.*tar' \
-        | sed 's/ENV.*REDIS_DOWNLOAD_URL.*[-/]\([1-9][0-9]*\..*\)\.tar\.gz/\1/g' \
-        | grep -E '^[1-9][0-9]*\.'
-        )
-    console_output 2 gray "redis_version=$redis_version"
-    if [ -z "$redis_version" ]; then
-        console_output 0 red "Error: Failed to extract redis version from dockerfile"
-        decrease_indent_level
-        return 1
-    fi
-    echo "$redis_version"
-    decrease_indent_level
-}
-
 redis_version_split() {
     local version
     local numerics
@@ -175,6 +207,8 @@ generate_tags_list() {
     local is_latest=$3
     local is_default=$4
 
+    console_output 2 gray "Generate tags redis_version=$redis_version distro_names=$distro_names is_latest=$is_latest id_default=$is_default"
+
     local tags versions
 
     local major minor patch suffix
@@ -183,8 +217,13 @@ generate_tags_list() {
     local mainline_version
     mainline_version="$major.$minor"
 
-    versions=("$redis_version" "$mainline_version")
-    if [ "$is_latest" = 1 ]; then
+    versions=("$redis_version")
+    #  generate mainline version tag only for GA releases, e.g 8.2 and 8.2-distro
+    #  tags will be generated only for 8.2.1 but not for 8.2.1-m01
+    if [ -z "$suffix" ]; then
+        versions+=("$mainline_version")
+    fi
+    if [ "$is_latest" != "" ]; then
         versions+=("$major")
     fi
 
@@ -198,7 +237,7 @@ generate_tags_list() {
         done
     done
 
-    if [ "$is_latest" = 1 ]; then
+    if [ "$is_latest" != "" ]; then
         if [ "$is_default" = 1 ]; then
             tags+=("latest")
         fi
@@ -211,20 +250,24 @@ generate_tags_list() {
 
 generate_stackbrew_library() {
     local commit redis_version distro distro_version
-    local is_latest="unset" is_default
+    local is_latest="" is_latest_unset=1 is_default
 
     local stackbrew_content
 
-    while read -r commit redis_version distro distro_version; do
+    mapfile -t releases
+    for line in "${releases[@]}"; do
+        read -r commit redis_version distro distro_version < <(echo "$line")
+
         local major minor patch suffix
         IFS=: read -r major minor patch suffix < <(redis_version_split "$redis_version")
 
         # assigning latest to the first non milestone (empty suffix) version from top
-        if [ "$is_latest" = "unset" ]; then
+        if [ "$is_latest_unset" = 1 ]; then
             if [ -z "$suffix" ]; then
-                is_latest=1
+                is_latest="$minor"
+                is_latest_unset=""
             fi
-        else
+        elif [ "$is_latest" != "$minor" ]; then
             is_latest=""
         fi
 
