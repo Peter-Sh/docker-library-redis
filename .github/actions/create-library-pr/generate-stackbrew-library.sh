@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -o pipefail
 
 # shellcheck disable=SC2034
 last_cmd_stdout=""
@@ -47,7 +48,7 @@ if [ -z "$MAJOR_VERSION" ]; then
     exit 1
 fi
 
-execute_command git fetch
+set -u
 redis_versions=$(get_actual_major_redis_versions "$REMOTE" "$MAJOR_VERSION")
 echo "$redis_versions" | git_fetch_unshallow_refs "$REMOTE"
 echo "$redis_versions" | prepare_releases_list | generate_stackbrew_library
