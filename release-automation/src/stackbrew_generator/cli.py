@@ -81,7 +81,7 @@ def generate(
             raise typer.Exit(1)
 
         # Fetch required refs
-        refs_to_fetch = [commit for _, commit in versions]
+        refs_to_fetch = [commit for _, commit, _ in versions]
         git_client.fetch_refs(refs_to_fetch)
 
         # Prepare releases list with distribution information
