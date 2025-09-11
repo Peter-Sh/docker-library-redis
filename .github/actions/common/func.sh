@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Sources a helper file from multiple possible locations (GITHUB_WORKSPACE, RELEASE_AUTOMATION_DIR, or relative path)
 source_helper_file() {
     local helper_file="$1"
     local helper_errors=""
@@ -25,6 +26,7 @@ source_helper_file() {
     fi
 }
 
+# Lists remote release branches for a specific major version (e.g., release/8.*)
 git_ls_remote_major_release_version_branches() {
     local remote="$1"
     local major_version="$2"
@@ -36,6 +38,7 @@ git_ls_remote_major_release_version_branches() {
     echo "$last_cmd_stdout"
 }
 
+# Lists remote tags for a specific major version (e.g., v8.*)
 git_ls_remote_tags() {
     local remote="$1"
     local major_version="$2"
@@ -47,6 +50,7 @@ git_ls_remote_tags() {
     echo "$last_cmd_stdout"
 }
 
+# Filters and sorts release branches by major version in reverse version order
 filter_major_release_version_branches() {
     local major_version="$1"
     while read -r line; do
@@ -58,19 +62,29 @@ filter_major_release_version_branches() {
     done | sort -Vr
 }
 
+# Sorts version tags in reverse version order for a specific major version
+# stdin: commit ref (git ls-remote)
+# stdout: version commit (vX.X.X sha1) - sorted by version
 sort_version_tags() {
     local major_version="$1"
     local version_tag commit ref
     while read -r commit ref; do
-        version_tag="$(echo "$ref" | grep -o "v$major_version\.[0-9][0-9]*\.[0-9][0-9]*.*")"
+        version_tag="$(echo "$ref" | grep -o "v$major_version\.[0-9][0-9]*\.[0-9][0-9]*.*" || :)"
+        if [ -z "$version_tag" ]; then
+            console_output 2 red "Incorrect reference format: $ref"
+            return 1
+        fi
         printf "%s %s\n" "$version_tag" "$commit"
     done  | sort -Vr
 }
 
+# Filters out end-of-life (EOL) versions by skipping entire minor version series marked with -eol suffix
+# stdin: version commit (vX.X.X sha1) - must be sorted by version
+# stdout: version commit (vX.X.X sha1)
 filter_out_eol_versions() {
     local major_version="$1"
     local version_tag commit
-    local last_minor skip_minor minors
+    local last_minor="" skip_minor="" minors=""
     local major minor patch suffix
     local versions
 
@@ -103,15 +117,15 @@ filter_out_eol_versions() {
     fi
 }
 
+# Filters Redis versions to keep only the latest patch version (and optionally the latest milestone) for each minor version
+# stdin: version commit (vX.X.X sha1) - must be sorted by version
+# stdout: version commit (vX.X.X sha1)
 filter_actual_major_redis_versions() {
     local major_version="$1"
     local last_minor="" last_is_milestone=""
     local ref commit version_tag
-
-    while read -r commit ref; do
-        version_tag="$(echo "$ref" | grep -o "v$major_version\.[0-9][0-9]*\.[0-9][0-9]*.*")"
-        echo "$version_tag $ref $commit"
-    done | sort -Vr | while read -r version_tag ref commit; do
+    console_output 2 gray "filter_actual_major_redis_versions"
+    while read -r version_tag commit; do
         local major minor patch suffix is_milestone
         IFS=: read -r major minor patch suffix < <(redis_version_split "$version_tag")
 
@@ -133,21 +147,20 @@ filter_actual_major_redis_versions() {
     done
 }
 
-get_major_release_version_branches () {
-    local remote="$1"
-    local major_version="$2"
-    execute_command git_ls_remote_major_release_version_branches "$remote" "$major_version" | execute_command filter_major_release_version_branches "$major_version"
-}
-
+# Gets and filters actual Redis versions (tags) from a remote repository for a major version
 get_actual_major_redis_versions() {
     local remote="$1"
     local major_version="$2"
-    execute_command git_ls_remote_tags "$remote" "$major_version" | execute_command filter_actual_major_redis_versions "$major_version"
+    execute_command git_ls_remote_tags "$remote" "$major_version" \
+    | execute_command sort_version_tags "$major_version" \
+    | execute_command filter_out_eol_versions "$major_version" \
+    | execute_command filter_actual_major_redis_versions "$major_version"
 }
 
+# Fetches unshallow refs from a remote repository for the provided list of references
 git_fetch_unshallow_refs() {
     local remote="$1"
-    local refs_to_fetch
+    local refs_to_fetch=""
     while read -r line; do
         local ref="$(echo "$line" | awk '{print $1}')"
         refs_to_fetch="$refs_to_fetch $ref"
@@ -156,6 +169,7 @@ git_fetch_unshallow_refs() {
     execute_command --no-std -- git_fetch_unshallow "$remote" $refs_to_fetch
 }
 
+# Extracts the distribution name from a Dockerfile's FROM statement (supports Alpine and Debian)
 extract_distro_name_from_dockerfile() {
     local base_img
     base_img="$(grep -m1 -i '^from' | awk '{print $2}')"
@@ -177,13 +191,14 @@ extract_distro_name_from_dockerfile() {
     echo "$distro"
 }
 
+# Splits a Redis version string into major:minor:patch:suffix components
 redis_version_split() {
     local version
     local numerics
     # shellcheck disable=SC2001
     version=$(echo "$1" | sed 's/^v//')
 
-    numerics=$(echo "$version" | grep -Po '^[1-9][0-9]*\.[0-9]+(\.[0-9]+|)')
+    numerics=$(echo "$version" | grep -Po '^[1-9][0-9]*\.[0-9]+(\.[0-9]+|)' || :)
     if [ -z "$numerics" ]; then
         console_output 2 red "Cannot split version '$version', incorrect version format"
         return 1
@@ -194,20 +209,22 @@ redis_version_split() {
     printf "%s:%s:%s:%s\n" "$major" "$minor" "$patch" "$suffix"
 }
 
-
+# Shows a file from a specific git reference (commit/branch/tag)
 git_show_file_from_ref() {
     local ref=$1
     local file=$2
     execute_command git show "$ref:$file"
 }
 
+# Generates a comma-separated list of Docker tags for a Redis version and distribution
+# args: redis_version distro_names is_latest is_default
+# is_latest empty for non-latest, otherwise latest
+# is_default 1 for default distro, otherwise not default
 generate_tags_list() {
     local redis_version=$1
     local distro_names=$2
     local is_latest=$3
     local is_default=$4
-
-    console_output 2 gray "Generate tags redis_version=$redis_version distro_names=$distro_names is_latest=$is_latest id_default=$is_default"
 
     local tags versions
 
@@ -248,11 +265,13 @@ generate_tags_list() {
     echo "$(IFS=, ; echo "${tags[*]}" | sed 's/,/, /g')"
 }
 
+# Generates stackbrew library content (for specific major version)
+# stdin: commit redis_version distro distro_version (sha1 vX.X.X alpine alpine3.21)
 generate_stackbrew_library() {
     local commit redis_version distro distro_version
     local is_latest="" is_latest_unset=1 is_default
 
-    local stackbrew_content
+    local stackbrew_content=""
 
     mapfile -t releases
     for line in "${releases[@]}"; do
@@ -287,9 +306,11 @@ generate_stackbrew_library() {
     console_output 2 gray "$stackbrew_content"
 }
 
+# Prepares a list of releases with commit, Redis version, distro, and distro version information
+# stdin: redis_version commit
 prepare_releases_list() {
     local redis_version commit
-    local debug_output version_line
+    local debug_output="" version_line
     while read -r redis_version commit; do
         for distro in debian alpine; do
             local dockerfile distro_version redis_version
