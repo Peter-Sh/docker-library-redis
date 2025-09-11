@@ -41,7 +41,7 @@ jobs:
             -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
             -e GITHUB_ACTOR="${{ github.actor }}" \
             -e GITHUB_REPOSITORY="${{ github.repository }}" \
-            ghcr.io/${{ github.repository }}/release-automation:latest \
+            $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
             generate 8
 
       - name: Validate Redis Release Archive
