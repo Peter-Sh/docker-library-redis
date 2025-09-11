@@ -1,9 +1,12 @@
 #!/bin/bash
+set -e -o pipefail
 SCRIPT_DIR="$(dirname -- "$( readlink -f -- "$0"; )")"
 # shellcheck disable=SC1091
 . "$SCRIPT_DIR/../.github/actions/common/func.sh"
 
 source_helper_file "helpers.sh"
+
+set -u
 
 init_console_output
 
