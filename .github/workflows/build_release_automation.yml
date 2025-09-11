@@ -56,7 +56,7 @@ jobs:
         run: |
           # Start container and install dev dependencies for testing
           docker run --rm \
-            -v ${{ github.workspace }}/release-automation:/workspace \
+            -v ${{ github.workspace }}:/workspace \
             -w /workspace \
             --entrypoint /bin/bash \
             test-image:latest \
