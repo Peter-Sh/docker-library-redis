@@ -39,8 +39,9 @@ jobs:
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
             --entrypoint /bin/bash\
+            --user $(id -u):0 \
             $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
-            -c 'cat .git/config; set -x; whoami; ls -al;'
+            -c 'cat .git/config; set -x; id; whoami; ls -al;'
 
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
