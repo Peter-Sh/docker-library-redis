@@ -24,6 +24,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test Release Automation Docker Image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            -e GITHUB_ACTOR="${{ github.actor }}" \
+            -e GITHUB_REPOSITORY="${{ github.repository }}" \
+            ghcr.io/${{ github.repository }}/release-automation:latest \
+            generate 8
+
       - name: Validate Redis Release Archive
         uses: redis/redis-oss-release-automation/.github/actions/validate-redis-release-archive@main
         with:
