@@ -52,6 +52,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # Integration tests do need access to git repository
       - name: Test the built image
         run: |
           # Start container and install dev dependencies for testing
