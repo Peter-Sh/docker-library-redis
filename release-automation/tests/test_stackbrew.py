@@ -15,7 +15,7 @@ class TestStackbrewGenerator:
         """Test tag generation for Debian GA version (latest)."""
         version = RedisVersion.parse("8.2.1")
         distribution = Distribution(type=DistroType.DEBIAN, name="bookworm")
-        release = Release(commit="abc123", version=version, distribution=distribution)
+        release = Release(commit="abc123", version=version, distribution=distribution, git_fetch_ref="refs/tags/v8.2.1")
 
         tags = self.generator.generate_tags_for_release(release, is_latest=True)
 
@@ -36,7 +36,7 @@ class TestStackbrewGenerator:
         """Test tag generation for Debian GA version (not latest)."""
         version = RedisVersion.parse("7.4.1")
         distribution = Distribution(type=DistroType.DEBIAN, name="bookworm")
-        release = Release(commit="abc123", version=version, distribution=distribution)
+        release = Release(commit="abc123", version=version, distribution=distribution, git_fetch_ref="refs/tags/v7.4.1")
 
         tags = self.generator.generate_tags_for_release(release, is_latest=False)
 
@@ -53,7 +53,7 @@ class TestStackbrewGenerator:
         """Test tag generation for Alpine GA version (latest)."""
         version = RedisVersion.parse("8.2.1")
         distribution = Distribution(type=DistroType.ALPINE, name="alpine3.22")
-        release = Release(commit="abc123", version=version, distribution=distribution)
+        release = Release(commit="abc123", version=version, distribution=distribution, git_fetch_ref="refs/tags/v8.2.1")
 
         tags = self.generator.generate_tags_for_release(release, is_latest=True)
 
@@ -74,7 +74,7 @@ class TestStackbrewGenerator:
         """Test tag generation for milestone version."""
         version = RedisVersion.parse("8.2.1-m01")
         distribution = Distribution(type=DistroType.DEBIAN, name="bookworm")
-        release = Release(commit="abc123", version=version, distribution=distribution)
+        release = Release(commit="abc123", version=version, distribution=distribution, git_fetch_ref="refs/tags/v8.2.1-m01")
 
         tags = self.generator.generate_tags_for_release(release, is_latest=False)
 
@@ -94,17 +94,20 @@ class TestStackbrewGenerator:
             Release(
                 commit="abc123",
                 version=RedisVersion.parse("8.2.1"),
-                distribution=Distribution(type=DistroType.DEBIAN, name="bookworm")
+                distribution=Distribution(type=DistroType.DEBIAN, name="bookworm"),
+                git_fetch_ref="refs/tags/v8.2.1"
             ),
             Release(
                 commit="abc123",
                 version=RedisVersion.parse("8.2.1"),
-                distribution=Distribution(type=DistroType.ALPINE, name="alpine3.22")
+                distribution=Distribution(type=DistroType.ALPINE, name="alpine3.22"),
+                git_fetch_ref="refs/tags/v8.2.1"
             ),
             Release(
                 commit="def456",
                 version=RedisVersion.parse("8.1.5"),
-                distribution=Distribution(type=DistroType.DEBIAN, name="bookworm")
+                distribution=Distribution(type=DistroType.DEBIAN, name="bookworm"),
+                git_fetch_ref="refs/tags/v8.1.5"
             )
         ]
 
@@ -128,7 +131,8 @@ class TestStackbrewGenerator:
             Release(
                 commit="abc123",
                 version=RedisVersion.parse("8.2.1"),
-                distribution=Distribution(type=DistroType.DEBIAN, name="bookworm")
+                distribution=Distribution(type=DistroType.DEBIAN, name="bookworm"),
+                git_fetch_ref="refs/tags/v8.2.1"
             )
         ]
 
@@ -147,32 +151,38 @@ class TestStackbrewGenerator:
             Release(
                 commit="8d4437bdd0443189f9b3ba5943fdf793f821e8e2",
                 version=RedisVersion.parse("8.2.2-m01-int1"),
-                distribution=Distribution.from_dockerfile_line("FROM debian:bookworm")
+                distribution=Distribution.from_dockerfile_line("FROM debian:bookworm"),
+                git_fetch_ref="refs/tags/v8.2.2-m01-int1"
             ),
             Release(
                 commit="8d4437bdd0443189f9b3ba5943fdf793f821e8e2",
                 version=RedisVersion.parse("8.2.2-m01-int1"),
-                distribution=Distribution.from_dockerfile_line("FROM alpine:3.22")
+                distribution=Distribution.from_dockerfile_line("FROM alpine:3.22"),
+                git_fetch_ref="refs/tags/v8.2.2-m01-int1"
             ),
             Release(
                 commit="a13b78815d980881e57f15b9cf13cd2f26f3fab6",
                 version=RedisVersion.parse("8.2.1"),
-                distribution=Distribution.from_dockerfile_line("FROM debian:bookworm")
+                distribution=Distribution.from_dockerfile_line("FROM debian:bookworm"),
+                git_fetch_ref="refs/tags/v8.2.1"
             ),
             Release(
                 commit="a13b78815d980881e57f15b9cf13cd2f26f3fab6",
                 version=RedisVersion.parse("8.2.1"),
-                distribution=Distribution.from_dockerfile_line("FROM alpine:3.22")
+                distribution=Distribution.from_dockerfile_line("FROM alpine:3.22"),
+                git_fetch_ref="refs/tags/v8.2.1"
             ),
             Release(
                 commit="101262a8cf05b98137d88bc17e77db90c24cc783",
                 version=RedisVersion.parse("8.0.3"),
-                distribution=Distribution.from_dockerfile_line("FROM debian:bookworm")
+                distribution=Distribution.from_dockerfile_line("FROM debian:bookworm"),
+                git_fetch_ref="refs/tags/v8.0.3"
             ),
             Release(
                 commit="101262a8cf05b98137d88bc17e77db90c24cc783",
                 version=RedisVersion.parse("8.0.3"),
-                distribution=Distribution.from_dockerfile_line("FROM alpine:3.21")
+                distribution=Distribution.from_dockerfile_line("FROM alpine:3.21"),
+                git_fetch_ref="refs/tags/v8.0.3"
             )
         ]
 

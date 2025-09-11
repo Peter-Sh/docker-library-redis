@@ -53,7 +53,7 @@ class TestRedisVersion:
         """Test parsing invalid version strings."""
         with pytest.raises(ValueError):
             RedisVersion.parse("invalid")
-        
+
         with pytest.raises(ValueError):
             RedisVersion.parse("0.1.0")  # Major version must be >= 1
 
@@ -61,7 +61,7 @@ class TestRedisVersion:
         """Test milestone detection."""
         ga_version = RedisVersion.parse("8.2.1")
         milestone_version = RedisVersion.parse("8.2.1-m01")
-        
+
         assert ga_version.is_milestone is False
         assert milestone_version.is_milestone is True
 
@@ -75,7 +75,7 @@ class TestRedisVersion:
         version1 = RedisVersion.parse("8.2.1")
         version2 = RedisVersion.parse("8.2.1-m01")
         version3 = RedisVersion.parse("8.2")
-        
+
         assert str(version1) == "8.2.1"
         assert str(version2) == "8.2.1-m01"
         assert str(version3) == "8.2"
@@ -86,14 +86,14 @@ class TestRedisVersion:
         v2 = RedisVersion.parse("8.2.2")
         v3 = RedisVersion.parse("8.2.1-m01")
         v4 = RedisVersion.parse("8.3.0")
-        
+
         # Test numeric comparison
         assert v1 < v2
         assert v2 < v4
-        
+
         # Test milestone vs GA (GA comes after milestone)
         assert v3 < v1
-        
+
         # Test sorting
         versions = [v4, v1, v3, v2]
         sorted_versions = sorted(versions)
@@ -125,7 +125,7 @@ class TestDistribution:
         """Test parsing invalid Dockerfile lines."""
         with pytest.raises(ValueError):
             Distribution.from_dockerfile_line("INVALID LINE")
-        
+
         with pytest.raises(ValueError):
             Distribution.from_dockerfile_line("FROM unsupported:latest")
 
@@ -133,7 +133,7 @@ class TestDistribution:
         """Test default distribution detection."""
         alpine = Distribution(type=DistroType.ALPINE, name="alpine3.22")
         debian = Distribution(type=DistroType.DEBIAN, name="bookworm")
-        
+
         assert alpine.is_default is False
         assert debian.is_default is True
 
@@ -141,7 +141,7 @@ class TestDistribution:
         """Test tag name generation."""
         alpine = Distribution(type=DistroType.ALPINE, name="alpine3.22")
         debian = Distribution(type=DistroType.DEBIAN, name="bookworm")
-        
+
         assert alpine.tag_names == ["alpine", "alpine3.22"]
         assert debian.tag_names == ["bookworm"]
 
@@ -153,13 +153,14 @@ class TestRelease:
         """Test creating a Release instance."""
         version = RedisVersion.parse("8.2.1")
         distribution = Distribution(type=DistroType.DEBIAN, name="bookworm")
-        
+
         release = Release(
             commit="abc123def456",
             version=version,
-            distribution=distribution
+            distribution=distribution,
+            git_fetch_ref="refs/tags/v8.2.1"
         )
-        
+
         assert release.commit == "abc123def456"
         assert release.version == version
         assert release.distribution == distribution
@@ -168,12 +169,13 @@ class TestRelease:
         """Test Release string representation."""
         version = RedisVersion.parse("8.2.1")
         distribution = Distribution(type=DistroType.DEBIAN, name="bookworm")
-        
+
         release = Release(
             commit="abc123def456",
             version=version,
-            distribution=distribution
+            distribution=distribution,
+            git_fetch_ref="refs/tags/v8.2.1"
         )
-        
+
         expected = "abc123de 8.2.1 debian bookworm"
         assert str(release) == expected
