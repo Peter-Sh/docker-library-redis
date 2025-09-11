@@ -61,6 +61,7 @@ jobs:
             --entrypoint /bin/bash \
             test-image:latest \
             -c "
+              cd release-automation
               set -e
               echo '=== Installing test dependencies ==='
               pip install pytest pytest-cov
