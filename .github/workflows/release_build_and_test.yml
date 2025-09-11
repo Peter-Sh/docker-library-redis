@@ -38,9 +38,6 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
-            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
-            -e GITHUB_ACTOR="${{ github.actor }}" \
-            -e GITHUB_REPOSITORY="${{ github.repository }}" \
             --entrypoint /bin/bash\
             $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
             -c 'cat .git/config; set -x; git config --global --add safe.directory /workspace; git remote -v; git ls-remote --refs --tags origin refs/tags/v8.*'
