@@ -43,7 +43,7 @@ jobs:
             -e GITHUB_REPOSITORY="${{ github.repository }}" \
             --entrypoint /bin/bash\
             $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
-            -c 'git remote -v'
+            -c 'git config --global --add safe.directory /workspace && git remote -v'
 
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
