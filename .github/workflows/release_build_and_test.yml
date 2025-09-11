@@ -41,6 +41,16 @@ jobs:
             -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
             -e GITHUB_ACTOR="${{ github.actor }}" \
             -e GITHUB_REPOSITORY="${{ github.repository }}" \
+            --entrypoint /bin/bash
+            $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
+            -c 'git remote -v'
+
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            -e GITHUB_ACTOR="${{ github.actor }}" \
+            -e GITHUB_REPOSITORY="${{ github.repository }}" \
             $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
             generate 8
 
