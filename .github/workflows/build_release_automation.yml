@@ -12,9 +12,6 @@ on:
         required: false
         default: true
         type: boolean
-  push:
-    branches:
-      - release/**
 
 env:
   REGISTRY: ghcr.io
