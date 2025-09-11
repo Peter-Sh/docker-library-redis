@@ -43,7 +43,7 @@ jobs:
             -e GITHUB_REPOSITORY="${{ github.repository }}" \
             --entrypoint /bin/bash\
             $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
-            -c 'cat .git/config; set -x; git config --global --add safe.directory /workspace; git remote -v'
+            -c 'cat .git/config; set -x; git config --global --add safe.directory /workspace; git remote -v; git ls-remote --refs --tags origin refs/tags/v8.*'
 
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
