@@ -45,7 +45,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./release-automation
-          file: ./release-automation/docker/Dockerfile.prod
+          file: ./release-automation/docker/Dockerfile
           push: false
           tags: test-image:latest
           load: true
