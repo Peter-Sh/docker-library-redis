@@ -154,6 +154,7 @@ class Release(BaseModel):
     commit: str = Field(..., description="Git commit hash")
     version: RedisVersion = Field(..., description="Redis version")
     distribution: Distribution = Field(..., description="Linux distribution")
+    git_fetch_ref: str = Field(..., description="Git fetch reference (e.g., refs/tags/v8.2.1)")
 
     def __str__(self) -> str:
         """String representation of the release."""
@@ -171,7 +172,20 @@ class StackbrewEntry(BaseModel):
     commit: str = Field(..., description="Git commit hash")
     version: RedisVersion = Field(..., description="Redis version")
     distribution: Distribution = Field(..., description="Linux distribution")
+    git_fetch_ref: str = Field(..., description="Git fetch reference (e.g., refs/tags/v8.2.1)")
+
+    # Hard-coded architectures as specified
+    architectures: List[str] = Field(
+        default_factory=lambda: ["amd64", "arm32v5", "arm32v7", "arm64v8", "i386", "mips64le", "ppc64le", "s390x"],
+        description="Supported architectures"
+    )
 
     def __str__(self) -> str:
-        """String representation as comma-separated tags."""
-        return ", ".join(self.tags)
+        """String representation in stackbrew format."""
+        lines = []
+        lines.append(f"Tags: {', '.join(self.tags)}")
+        lines.append(f"Architectures: {', '.join(self.architectures)}")
+        lines.append(f"GitCommit: {self.commit}")
+        lines.append(f"GitFetch: {self.git_fetch_ref}")
+        lines.append(f"Directory: {self.distribution.type.value}")
+        return "\n".join(lines)

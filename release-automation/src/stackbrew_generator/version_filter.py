@@ -22,14 +22,14 @@ class VersionFilter:
         """
         self.git_client = git_client
 
-    def get_redis_versions_from_tags(self, major_version: int) -> List[Tuple[RedisVersion, str]]:
+    def get_redis_versions_from_tags(self, major_version: int) -> List[Tuple[RedisVersion, str, str]]:
         """Get Redis versions from git tags.
 
         Args:
             major_version: Major version to filter for
 
         Returns:
-            List of (RedisVersion, commit) tuples sorted by version (newest first)
+            List of (RedisVersion, commit, tag_ref) tuples sorted by version (newest first)
         """
         console.print(f"[blue]Getting Redis versions for major version {major_version}[/blue]")
 
@@ -41,7 +41,7 @@ class VersionFilter:
         for commit, tag_ref in tags:
             try:
                 version = self.git_client.extract_version_from_tag(tag_ref, major_version)
-                versions.append((version, commit))
+                versions.append((version, commit, tag_ref))
             except Exception as e:
                 console.print(f"[yellow]Warning: Skipping invalid tag {tag_ref}: {e}[/yellow]")
                 continue
@@ -52,11 +52,11 @@ class VersionFilter:
         console.print(f"[dim]Parsed {len(versions)} valid versions[/dim]")
         return versions
 
-    def filter_eol_versions(self, versions: List[Tuple[RedisVersion, str]]) -> List[Tuple[RedisVersion, str]]:
+    def filter_eol_versions(self, versions: List[Tuple[RedisVersion, str, str]]) -> List[Tuple[RedisVersion, str, str]]:
         """Filter out end-of-life versions.
 
         Args:
-            versions: List of (RedisVersion, commit) tuples
+            versions: List of (RedisVersion, commit, tag_ref) tuples
 
         Returns:
             Filtered list with EOL minor versions removed
@@ -64,18 +64,18 @@ class VersionFilter:
         console.print("[blue]Filtering out EOL versions[/blue]")
 
         # Group versions by minor version
-        minor_versions: Dict[str, List[Tuple[RedisVersion, str]]] = {}
-        for version, commit in versions:
+        minor_versions: Dict[str, List[Tuple[RedisVersion, str, str]]] = {}
+        for version, commit, tag_ref in versions:
             minor_key = version.mainline_version
             if minor_key not in minor_versions:
                 minor_versions[minor_key] = []
-            minor_versions[minor_key].append((version, commit))
+            minor_versions[minor_key].append((version, commit, tag_ref))
 
         # Check each minor version for EOL marker
         filtered_versions = []
         for minor_key, minor_group in minor_versions.items():
             # Check if any version in this minor series is marked as EOL
-            has_eol = any(version.is_eol for version, _ in minor_group)
+            has_eol = any(version.is_eol for version, _, _ in minor_group)
 
             if has_eol:
                 console.print(f"[yellow]Skipping minor version {minor_key}.* due to EOL[/yellow]")
@@ -88,11 +88,11 @@ class VersionFilter:
         console.print(f"[dim]Kept {len(filtered_versions)} versions after EOL filtering[/dim]")
         return filtered_versions
 
-    def filter_actual_versions(self, versions: List[Tuple[RedisVersion, str]]) -> List[Tuple[RedisVersion, str]]:
+    def filter_actual_versions(self, versions: List[Tuple[RedisVersion, str, str]]) -> List[Tuple[RedisVersion, str, str]]:
         """Filter to keep only the latest patch version for each minor version and milestone status.
 
         Args:
-            versions: List of (RedisVersion, commit) tuples (should be sorted newest first)
+            versions: List of (RedisVersion, commit, tag_ref) tuples (should be sorted newest first)
 
         Returns:
             Filtered list with only the latest versions for each minor/milestone combination
@@ -102,13 +102,13 @@ class VersionFilter:
         seen_combinations = set()
         filtered_versions = []
 
-        for version, commit in versions:
+        for version, commit, tag_ref in versions:
             # Create a key for minor version + milestone status
             combination_key = (version.mainline_version, version.is_milestone)
 
             if combination_key not in seen_combinations:
                 seen_combinations.add(combination_key)
-                filtered_versions.append((version, commit))
+                filtered_versions.append((version, commit, tag_ref))
 
                 milestone_str = "milestone" if version.is_milestone else "GA"
                 console.print(f"[dim]Selected [bold yellow]{version}[/bold yellow] ({milestone_str}) - {commit[:8]}[/dim]")
@@ -119,7 +119,7 @@ class VersionFilter:
         console.print(f"[dim]Selected {len(filtered_versions)} actual versions[/dim]")
         return filtered_versions
 
-    def get_actual_major_redis_versions(self, major_version: int) -> List[Tuple[RedisVersion, str]]:
+    def get_actual_major_redis_versions(self, major_version: int) -> List[Tuple[RedisVersion, str, str]]:
         """Get the actual Redis versions to process for a major version.
 
         This is the main entry point that combines all filtering steps:
@@ -131,7 +131,7 @@ class VersionFilter:
             major_version: Major version to process
 
         Returns:
-            List of (RedisVersion, commit) tuples for processing
+            List of (RedisVersion, commit, tag_ref) tuples for processing
         """
         console.print(f"[bold blue]Processing Redis {major_version}.x versions[/bold blue]")
 
@@ -147,7 +147,7 @@ class VersionFilter:
         versions = self.filter_actual_versions(versions)
 
         console.print(f"[green]Final selection: {len(versions)} versions to process[/green]")
-        for version, commit in versions:
+        for version, commit, tag_ref in versions:
             console.print(f"[green]  [bold yellow]{version}[/bold yellow] - {commit[:8]}[/green]")
 
         return versions

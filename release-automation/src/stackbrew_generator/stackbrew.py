@@ -101,7 +101,8 @@ class StackbrewGenerator:
                     tags=tags,
                     commit=release.commit,
                     version=release.version,
-                    distribution=release.distribution
+                    distribution=release.distribution,
+                    git_fetch_ref=release.git_fetch_ref
                 )
                 entries.append(entry)
 
@@ -125,7 +126,9 @@ class StackbrewGenerator:
             return ""
 
         lines = []
-        for entry in entries:
+        for i, entry in enumerate(entries):
+            if i > 0:
+                lines.append("")  # Add blank line between entries
             lines.append(str(entry))
 
         return "\n".join(lines)

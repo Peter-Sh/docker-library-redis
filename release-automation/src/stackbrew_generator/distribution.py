@@ -79,11 +79,11 @@ class DistributionDetector:
                 f"Failed to get distribution for {distro_type} from {commit}: {e}"
             ) from e
 
-    def prepare_releases_list(self, versions: List[Tuple[RedisVersion, str]]) -> List[Release]:
+    def prepare_releases_list(self, versions: List[Tuple[RedisVersion, str, str]]) -> List[Release]:
         """Prepare list of releases with distribution information.
 
         Args:
-            versions: List of (RedisVersion, commit) tuples
+            versions: List of (RedisVersion, commit, tag_ref) tuples
 
         Returns:
             List of Release objects with distribution information
@@ -93,7 +93,7 @@ class DistributionDetector:
         releases = []
         distro_types = ["debian", "alpine"]
 
-        for version, commit in versions:
+        for version, commit, tag_ref in versions:
             console.print(f"[dim]Processing [bold yellow]{version}[/bold yellow] - {commit[:8]}[/dim]")
 
             for distro_type in distro_types:
@@ -103,7 +103,8 @@ class DistributionDetector:
                     release = Release(
                         commit=commit,
                         version=version,
-                        distribution=distribution
+                        distribution=distribution,
+                        git_fetch_ref=tag_ref
                     )
 
                     releases.append(release)

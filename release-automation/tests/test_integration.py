@@ -44,7 +44,8 @@ class TestIntegration:
             Release(
                 commit="abc123",
                 version=RedisVersion.parse("8.2.1"),
-                distribution=Distribution(type=DistroType.DEBIAN, name="bookworm")
+                distribution=Distribution(type=DistroType.DEBIAN, name="bookworm"),
+                git_fetch_ref="refs/tags/v8.2.1"
             )
         ]
         mock_distribution_detector.prepare_releases_list.return_value = mock_releases
