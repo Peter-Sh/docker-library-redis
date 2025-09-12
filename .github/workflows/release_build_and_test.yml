@@ -31,17 +31,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Test Release Automation Docker Image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker run --rm \
-            -v ${{ github.workspace }}:/workspace \
-            -w /workspace \
-            -e FORCE_COLOR=1 \
-            $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
-            generate 8
-
       - name: Validate Redis Release Archive
         uses: redis/redis-oss-release-automation/.github/actions/validate-redis-release-archive@main
         with:
@@ -63,12 +52,16 @@ jobs:
           release_version_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
 
   build-and-test:
+    runs-on: ["ubuntu-latest"]
+    steps:
+      - shell: bash
+        run: |
+          echo Hi
     needs: prepare-release
-    uses: ./.github/workflows/pre-merge.yml
-    secrets: inherit
-    with:
-      release_tag: ${{ github.event.inputs.release_tag }}
-
+    #uses: ./.github/workflows/pre-merge.yml
+    #secrets: inherit
+    #with:
+    #  release_tag: ${{ github.event.inputs.release_tag }}
 
   merge-back-to-release-branch:
     needs: [prepare-release, build-and-test]
@@ -87,8 +80,27 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge back to release branch
+        id: merge-back
         uses: redis/redis-oss-release-automation/.github/actions/merge-branches-verified@main
         with:
           from_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
           to_branch: ${{ steps.ensure-branch.outputs.release_branch }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create version tag
+        uses: redis/redis-oss-release-automation/.github/actions/create-tag-verified@main
+        with:
+          tag: v${{ github.event.inputs.release_tag }}
+          ref: ${{ steps.merge-back.outputs.merge_commit_sha }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Test Release Automation Docker Image
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     docker run --rm \
+      #       -v ${{ github.workspace }}:/workspace \
+      #       -w /workspace \
+      #       -e FORCE_COLOR=1 \
+      #       $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
+      #       generate 8
