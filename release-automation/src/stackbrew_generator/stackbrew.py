@@ -1,5 +1,7 @@
 """Stackbrew library generation."""
 
+import re
+from pathlib import Path
 from typing import List
 
 from rich.console import Console
@@ -132,3 +134,161 @@ class StackbrewGenerator:
             lines.append(str(entry))
 
         return "\n".join(lines)
+
+
+class StackbrewUpdater:
+    """Updates stackbrew library files by replacing entries for specific major versions."""
+
+    def __init__(self):
+        """Initialize the updater."""
+        pass
+
+    def update_stackbrew_content(self, input_file: Path, major_version: int, new_content: str, verbose: bool = False) -> str:
+        """Update stackbrew file content by replacing entries for a specific major version.
+
+        Args:
+            input_file: Path to the input stackbrew file
+            major_version: Major version to replace entries for
+            new_content: New stackbrew content to insert
+            verbose: Whether to print verbose output
+
+        Returns:
+            Updated stackbrew file content
+        """
+        content = input_file.read_text(encoding='utf-8')
+        lines = content.split('\n')
+
+        # Find header (everything before the first Tags: line)
+        header_lines = []
+        content_start_idx = 0
+
+        for i, line in enumerate(lines):
+            if line.startswith('Tags:'):
+                content_start_idx = i
+                break
+            header_lines.append(line)
+
+        if content_start_idx == 0 and not any(line.startswith('Tags:') for line in lines):
+            # No existing entries, just append new content
+            if verbose:
+                console.print("[dim]No existing entries found, appending new content[/dim]")
+            return content.rstrip() + '\n\n' + new_content
+
+        # Parse entries and find where target major version entries start and end
+        entries = self._parse_stackbrew_entries(lines[content_start_idx:])
+        target_entries = []
+        other_entries_before = []
+        other_entries_after = []
+        target_start_found = False
+        target_end_found = False
+        removed_count = 0
+
+        for entry in entries:
+            if self._entry_belongs_to_major_version(entry, major_version):
+                target_entries.append(entry)
+                removed_count += 1
+                if not target_start_found:
+                    target_start_found = True
+            elif not target_start_found:
+                # Entries before target major version
+                other_entries_before.append(entry)
+            else:
+                # Entries after target major version
+                other_entries_after.append(entry)
+                if not target_end_found:
+                    target_end_found = True
+
+        if verbose:
+            if removed_count > 0:
+                console.print(f"[dim]Removed {removed_count} existing entries for Redis {major_version}.x[/dim]")
+            else:
+                console.print(f"[dim]No existing entries found for Redis {major_version}.x, placing at end[/dim]")
+
+        # Reconstruct the file
+        result_lines = header_lines[:]
+
+        # Add entries before target major version
+        for entry in other_entries_before:
+            if result_lines and result_lines[-1].strip():  # Add blank line if needed
+                result_lines.append('')
+            result_lines.extend(entry)
+
+        # Add new content for the target major version
+        if result_lines and result_lines[-1].strip():  # Add blank line if needed
+            result_lines.append('')
+        result_lines.extend(new_content.split('\n'))
+
+        # Add entries after target major version
+        for entry in other_entries_after:
+            if result_lines and result_lines[-1].strip():  # Add blank line if needed
+                result_lines.append('')
+            result_lines.extend(entry)
+
+        return '\n'.join(result_lines)
+
+    def _parse_stackbrew_entries(self, lines: List[str]) -> List[List[str]]:
+        """Parse stackbrew entries from lines, returning list of entry line groups.
+
+        Args:
+            lines: Lines to parse
+
+        Returns:
+            List of entry line groups
+        """
+        entries = []
+        current_entry = []
+
+        for line in lines:
+            line = line.rstrip()
+
+            if line.startswith('Tags:') and current_entry:
+                # Start of new entry, save the previous one
+                entries.append(current_entry)
+                current_entry = [line]
+            elif line.startswith('Tags:'):
+                # First entry
+                current_entry = [line]
+            elif current_entry and (line.startswith(('Architectures:', 'GitCommit:', 'GitFetch:', 'Directory:')) or line.strip() == ''):
+                # Part of current entry
+                current_entry.append(line)
+            elif not line.strip() and not current_entry:
+                # Empty line before any entry starts, skip
+                continue
+            elif not line.strip() and current_entry:
+                # Empty line after entry content - end of entry
+                if current_entry:
+                    entries.append(current_entry)
+                    current_entry = []
+
+        # Don't forget the last entry
+        if current_entry:
+            entries.append(current_entry)
+
+        return entries
+
+    def _entry_belongs_to_major_version(self, entry_lines: List[str], major_version: int) -> bool:
+        """Check if a stackbrew entry belongs to the specified major version.
+
+        Args:
+            entry_lines: Lines of the stackbrew entry
+            major_version: Major version to check for
+
+        Returns:
+            True if the entry belongs to the major version
+        """
+        for line in entry_lines:
+            if line.startswith('Tags:'):
+                tags_line = line[5:].strip()  # Remove 'Tags:' prefix
+                tags = [tag.strip() for tag in tags_line.split(',')]
+
+                # Check if any tag indicates this major version
+                for tag in tags:
+                    # Look for patterns like "8", "8.2", "8.2.1", "8-alpine", etc.
+                    if re.match(rf'^{major_version}(?:\.|$|-)', tag):
+                        return True
+                    # Also check for "latest" tag which typically belongs to the highest major version
+                    # But we'll be conservative and not assume latest belongs to our major version
+                    # unless we have other evidence
+                break
+
+        return False
