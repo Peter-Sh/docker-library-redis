@@ -2,7 +2,7 @@
 
 import pytest
 
-from stackbrew_generator.models import RedisVersion, Distribution, DistroType, Release
+from stackbrew_generator.models import RedisVersion, Distribution, DistroType, Release, StackbrewEntry
 
 
 class TestRedisVersion:
@@ -179,3 +179,61 @@ class TestRelease:
 
         expected = "abc123de 8.2.1 debian bookworm"
         assert str(release) == expected
+
+
+class TestStackbrewEntry:
+    """Tests for StackbrewEntry model."""
+
+    def test_debian_architectures(self):
+        """Test that Debian distributions get the correct architectures."""
+        version = RedisVersion.parse("8.2.1")
+        distribution = Distribution(type=DistroType.DEBIAN, name="bookworm")
+
+        entry = StackbrewEntry(
+            tags=["8.2.1", "latest"],
+            commit="abc123def456",
+            version=version,
+            distribution=distribution,
+            git_fetch_ref="refs/tags/v8.2.1"
+        )
+
+        expected_architectures = ["amd64", "arm32v5", "arm32v7", "arm64v8", "i386", "mips64le", "ppc64le", "s390x"]
+        assert entry.architectures == expected_architectures
+
+    def test_alpine_architectures(self):
+        """Test that Alpine distributions get the correct architectures."""
+        version = RedisVersion.parse("8.2.1")
+        distribution = Distribution(type=DistroType.ALPINE, name="alpine3.22")
+
+        entry = StackbrewEntry(
+            tags=["8.2.1-alpine", "alpine"],
+            commit="abc123def456",
+            version=version,
+            distribution=distribution,
+            git_fetch_ref="refs/tags/v8.2.1"
+        )
+
+        expected_architectures = ["amd64", "arm32v6", "arm32v7", "arm64v8", "i386", "ppc64le", "riscv64", "s390x"]
+        assert entry.architectures == expected_architectures
+
+    def test_stackbrew_entry_string_format(self):
+        """Test that StackbrewEntry formats correctly with architectures."""
+        version = RedisVersion.parse("8.2.1")
+        distribution = Distribution(type=DistroType.ALPINE, name="alpine3.22")
+
+        entry = StackbrewEntry(
+            tags=["8.2.1-alpine", "alpine"],
+            commit="abc123def456",
+            version=version,
+            distribution=distribution,
+            git_fetch_ref="refs/tags/v8.2.1"
+        )
+
+        output = str(entry)
+
+        # Check that it contains the expected Alpine architectures
+        assert "amd64, arm32v6, arm32v7, arm64v8, i386, ppc64le, riscv64, s390x" in output
+        assert "Tags: 8.2.1-alpine, alpine" in output
+        assert "GitCommit: abc123def456" in output
+        assert "GitFetch: refs/tags/v8.2.1" in output
+        assert "Directory: alpine" in output
