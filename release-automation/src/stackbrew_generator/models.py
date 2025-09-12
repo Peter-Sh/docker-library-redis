@@ -174,11 +174,16 @@ class StackbrewEntry(BaseModel):
     distribution: Distribution = Field(..., description="Linux distribution")
     git_fetch_ref: str = Field(..., description="Git fetch reference (e.g., refs/tags/v8.2.1)")
 
-    # Hard-coded architectures as specified
-    architectures: List[str] = Field(
-        default_factory=lambda: ["amd64", "arm32v5", "arm32v7", "arm64v8", "i386", "mips64le", "ppc64le", "s390x"],
-        description="Supported architectures"
-    )
+    @property
+    def architectures(self) -> List[str]:
+        """Get supported architectures based on distribution type."""
+        if self.distribution.type == DistroType.DEBIAN:
+            return ["amd64", "arm32v5", "arm32v7", "arm64v8", "i386", "mips64le", "ppc64le", "s390x"]
+        elif self.distribution.type == DistroType.ALPINE:
+            return ["amd64", "arm32v6", "arm32v7", "arm64v8", "i386", "ppc64le", "riscv64", "s390x"]
+        else:
+            # Fallback to debian architectures for unknown distributions
+            return ["amd64", "arm32v5", "arm32v7", "arm64v8", "i386", "mips64le", "ppc64le", "s390x"]
 
     def __str__(self) -> str:
         """String representation in stackbrew format."""
