@@ -88,6 +88,7 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create version tag
+        if: ${{ steps.merge-back.outputs.merge_commit_sha != '' }}
         uses: redis/redis-oss-release-automation/.github/actions/create-tag-verified@main
         with:
           tag: v${{ github.event.inputs.release_tag }}
