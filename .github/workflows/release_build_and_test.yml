@@ -91,8 +91,8 @@ jobs:
         shell: bash
         run: |
           echo "Merge commit SHA: ${{ steps.merge-back.outputs.merge_commit_sha }}"
-          echo "Merge commit SHA length: ${{ steps.merge-back.outputs.merge_commit_sha }}" | wc -c
-          echo "Merge commit SHA: ${{ steps.merge-back.outputs.merge_commit_sha }}" | hexdump || :
+          echo "Merge commit SHA length: $(echo -n "${{ steps.merge-back.outputs.merge_commit_sha }}"" | wc -c)
+          echo -n "${{ steps.merge-back.outputs.merge_commit_sha }}" | hexdump || :
           echo if:${{ steps.merge-back.outputs.merge_commit_sha != '' }}
 
       - name: Create version tag
