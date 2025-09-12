@@ -35,9 +35,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker run --rm -i \
+          docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
+            -e FORCE_COLOR=1 \
             $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
             generate 8
 
