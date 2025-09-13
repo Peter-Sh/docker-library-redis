@@ -13,7 +13,7 @@ on:
         required: false
     push:
       branches:
-        - release/8*
+        - release/**
 
 # UUID is used to help automation to identify workflow run in the list of workflow runs.
 run-name: "Release Publish${{ github.event.inputs.workflow_uuid && format(': {0}', github.event.inputs.workflow_uuid) || '' }}"
