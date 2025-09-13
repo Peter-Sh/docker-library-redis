@@ -93,7 +93,7 @@ jobs:
         id: create-pr
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.gh_token_for_fork }}
           push-to-fork: Sh-Peter/official-images
           path: official-images
           branch: redis-${{ steps.parse-release.outputs.release_version }}
