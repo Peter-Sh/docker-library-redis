@@ -69,8 +69,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: official-images
-          repository: Sh-Peter/official-library
-          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: Sh-Peter/official-images
 
       - name: Generate stackbrew library content
         env:
