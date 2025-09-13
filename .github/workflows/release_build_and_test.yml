@@ -87,13 +87,44 @@ jobs:
           to_branch: ${{ steps.ensure-branch.outputs.release_branch }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create version tag
-        if: ${{ steps.merge-back.outputs.merge_commit_sha != '' }}
-        uses: redis/redis-oss-release-automation/.github/actions/create-tag-verified@main
+      - name: Create release handle JSON
+        shell: bash
+        run: |
+          if [ -n "${{ steps.merge-back.outputs.merge_commit_sha }}" ]; then
+            RELEASE_COMMIT_SHA="${{ steps.merge-back.outputs.merge_commit_sha }}"
+          elif [ -n "${{ steps.merge-back.outputs.target_before_merge_sha }}" ]; then
+            RELEASE_COMMIT_SHA="${{ steps.merge-back.outputs.target_before_merge_sha }}"
+          else
+            echo "Error: No commit SHA found, both merge_commit_sha and target_before_merge_sha are empty" >&2
+            exit 1
+          fi
+
+          cat > release_handle.json << EOF
+          {
+            "release_commit_sha": "$RELEASE_COMMIT_SHA",
+            "release_version": "${{ github.event.inputs.release_tag }}",
+            "release_version_branch": "${{ steps.ensure-branch.outputs.release_version_branch }}",
+            "release_branch": "${{ steps.ensure-branch.outputs.release_branch }}"
+          }
+          EOF
+
+          echo "Created release_handle.json:"
+          cat release_handle.json
+
+      - name: Upload release handle artifact
+        uses: actions/upload-artifact@v4
         with:
-          tag: v${{ github.event.inputs.release_tag }}
-          ref: ${{ steps.merge-back.outputs.merge_commit_sha }}
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          name: release-handle
+          path: release_handle.json
+          retention-days: 30
+
+      # - name: Create version tag
+      #   if: ${{ steps.merge-back.outputs.merge_commit_sha != '' }}
+      #   uses: redis/redis-oss-release-automation/.github/actions/create-tag-verified@main
+      #   with:
+      #     tag: v${{ github.event.inputs.release_tag }}
+      #     ref: ${{ steps.merge-back.outputs.merge_commit_sha }}
+      #     gh_token: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Test Release Automation Docker Image
       #   env:
