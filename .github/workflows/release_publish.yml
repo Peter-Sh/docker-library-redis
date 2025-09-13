@@ -69,7 +69,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: official-images
-          repository: Sh-Peter/official-images
+          repository: Peter-Sh/official-images
 
       - name: Generate stackbrew library content
         env:
@@ -86,13 +86,15 @@ jobs:
             -e FORCE_COLOR=1 \
             $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]') \
             update-stackbrew-file $MAJOR_VERSION --input official-images/library/redis --output official-images/library/redis
+          cd official-images && git diff
+          cd -
 
       - name: Create pull request to official-images
         id: create-pr
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          push-to-fork: Peter-Sh/official-images
+          push-to-fork: Sh-Peter/official-images
           path: official-images
           branch: redis-${{ steps.parse-release.outputs.release_version }}
           commit-message: "Redis: Update to ${{ steps.parse-release.outputs.release_version }}"
