@@ -113,6 +113,7 @@ class StackbrewGenerator:
                 console.print(f"[yellow]No tags generated for {release}[/yellow]")
 
         console.print(f"[green]Generated {len(entries)} stackbrew entries[/green]")
+        console.print(f"[dim]{self.format_stackbrew_output(entries)}[/dim]")
         return entries
 
     def format_stackbrew_output(self, entries: List[StackbrewEntry]) -> str:
