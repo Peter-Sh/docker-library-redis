@@ -64,3 +64,47 @@ jobs:
           tag: v${{ steps.parse-release.outputs.release_version }}
           ref: ${{ steps.parse-release.outputs.release_commit_sha }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout official-images repo
+        uses: actions/checkout@v4
+        with:
+          path: official-images
+          repository: Sh-Peter/official-library
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate stackbrew library content
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Extract major version from release version (e.g., "8.2.1" -> "8")
+          MAJOR_VERSION=$(echo "${{ steps.parse-release.outputs.release_version }}" | cut -d. -f1)
+          echo "Major version: $MAJOR_VERSION"
+
+          # Generate updated stackbrew content using the release automation Docker image
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            -e FORCE_COLOR=1 \
+            $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]') \
+            update-stackbrew-file --input official-images/library/redis --output official-images/library/redis
+
+      - name: Create pull request to official-images
+        id: create-pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          push-to-fork: Peter-Sh/official-images
+          path: official-images
+          branch: redis-${{ steps.parse-release.outputs.release_version }}
+          commit-message: "Redis: Update to ${{ steps.parse-release.outputs.release_version }}"
+          title: "Redis: Update to ${{ steps.parse-release.outputs.release_version }}"
+          body: |
+            Automated update for Redis ${{ steps.parse-release.outputs.release_version }}
+
+            Release commit: ${{ steps.parse-release.outputs.release_commit_sha }}
+            Release tag: v${{ steps.parse-release.outputs.release_version }}
+
+      - name: PR creation results
+        run: |
+          echo "Pull Request Number: ${{ steps.create-pr.outputs.pull-request-number }}"
+          echo "Pull Request URL: ${{ steps.create-pr.outputs.pull-request-url }}"
