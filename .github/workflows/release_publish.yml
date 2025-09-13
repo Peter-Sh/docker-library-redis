@@ -85,7 +85,7 @@ jobs:
             -w /workspace \
             -e FORCE_COLOR=1 \
             $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]') \
-            update-stackbrew-file --input official-images/library/redis --output official-images/library/redis
+            update-stackbrew-file $MAJOR_VERSION --input official-images/library/redis --output official-images/library/redis
 
       - name: Create pull request to official-images
         id: create-pr
