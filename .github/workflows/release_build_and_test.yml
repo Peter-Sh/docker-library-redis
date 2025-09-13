@@ -114,7 +114,7 @@ jobs:
       - name: Upload release handle artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-handle
+          name: release_handle
           path: release_handle.json
           retention-days: 30
 
