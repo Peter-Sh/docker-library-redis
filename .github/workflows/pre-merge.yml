@@ -84,7 +84,7 @@ jobs:
         run: |
           if [ -d "./image-urls" ] && [ "$(ls -A ./image-urls 2>/dev/null)" ]; then
             echo "Found image URL files:"
-            urls=$(find ./image-urls -name "*.txt" -exec cat {} \; | jq -R -s 'split("\n") | map(select(length > 0))')
+            urls=$(find ./image-urls -name "*.txt" -exec cat {} \; | jq -R -s -c 'split("\n") | map(select(length > 0))')
             echo "Collected image URLs: $urls"
           else
             echo "No image URL artifacts found"
