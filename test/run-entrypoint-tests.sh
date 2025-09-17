@@ -21,7 +21,7 @@
 ##
 
 # Container initialization wait time in seconds
-CONTAINER_INIT_WAIT=3
+CONTAINER_INIT_WAIT=6
 
 if [ -z "$REDIS_IMG" ]; then
 	echo "REDIS_IMG may not be empty"
@@ -63,7 +63,7 @@ fi
 #   1 if timeout CONTAINER_INIT_WAIT occurs
 wait_for_redis_server_in_container() {
 	local container="$1"
-	local timeout="${CONTAINER_INIT_WAIT:-6}"
+	local timeout="${CONTAINER_INIT_WAIT:-3}"
 	local elapsed=0
 	local sleep_interval=0.1
 
