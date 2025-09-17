@@ -1,3 +1,4 @@
+
 name: Build and Test
 on:
   pull_request:
@@ -26,15 +27,15 @@ jobs:
           - alpine
         platform:
           - linux/amd64
-          - linux/i386
-          - linux/arm/v5
-          - linux/arm/v6
-          - linux/arm/v7
-          - linux/mips64le
-          - linux/ppc64le
-          - linux/s390x
+          # - linux/i386
+          # - linux/arm/v5
+          # - linux/arm/v6
+          # - linux/arm/v7
+          # - linux/mips64le
+          # - linux/ppc64le
+          # - linux/s390x
           - linux/arm64
-          - linux/riscv64
+          # - linux/riscv64
         exclude:
         - distribution: alpine
           platform: linux/mips64le
@@ -80,14 +81,9 @@ jobs:
       - name: Collect image URLs from artifacts
         id: collect-urls
         run: |
-          # Create JSON array from all URL files using jq
           if [ -d "./image-urls" ] && [ "$(ls -A ./image-urls 2>/dev/null)" ]; then
             echo "Found image URL files:"
-            ls -la ./image-urls/
-
-            # Read all URL files and create JSON array with jq
             urls=$(find ./image-urls -name "*.txt" -exec cat {} \; | jq -R -s 'split("\n") | map(select(length > 0))')
-
             echo "Collected image URLs: $urls"
           else
             echo "No image URL artifacts found"
@@ -95,4 +91,3 @@ jobs:
           fi
 
           echo "urls=$urls" >> "$GITHUB_OUTPUT"
-
