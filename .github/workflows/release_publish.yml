@@ -126,4 +126,4 @@ jobs:
         with:
           name: release_info
           path: release_info.json
-          retention-days: 30
+          retention-days: 400
