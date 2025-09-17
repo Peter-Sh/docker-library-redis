@@ -106,6 +106,9 @@ jobs:
           commit-message: "Redis: Update to ${{ steps.parse-release.outputs.release_version }}"
           title: "Redis: Update to ${{ steps.parse-release.outputs.release_version }}"
           body: |
+            THIS IS A DRAFT PR FOR AUTOMATION TESTING
+            PLEASE IGNORE AND SORRY FOR BOTHERING
+
             Automated update for Redis ${{ steps.parse-release.outputs.release_version }}
 
             Release commit: ${{ steps.parse-release.outputs.release_commit_sha }}
