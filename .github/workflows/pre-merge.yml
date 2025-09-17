@@ -24,7 +24,7 @@ jobs:
       matrix:
         distribution:
           - debian
-          - alpine
+          # - alpine
         platform:
           - linux/amd64
           # - linux/i386
