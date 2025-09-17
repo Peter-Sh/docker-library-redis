@@ -1,3 +1,4 @@
+
 name: Build and Test
 
 inputs:
@@ -231,11 +232,12 @@ runs:
       id: format-registry-tag
       shell: bash
       run: |
-        printf "tag=%s:%s%s-%s" \
+        printf "tag=%s:%s%s-%s-%s" \
           "${{ inputs.registry_repository }}" \
           "${{ inputs.release_tag != '' && format('{0}-', inputs.release_tag || '') }}" \
           "${{ github.sha }}" \
           "${{ inputs.distribution }}" \
+          "${{ steps.platform.outputs.display_name }}" \
           | tr '[:upper:]' '[:lower:]' >> "$GITHUB_OUTPUT"
 
     - name: Push image
@@ -247,3 +249,23 @@ runs:
         tags: ${{ steps.format-registry-tag.outputs.tag }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+    - name: Save image URL to artifact
+      shell: bash
+      run: |
+        if [[ "${{ inputs.publish_image }}" == "true" && "${{ contains(fromJSON('["amd64", "arm64"]'), steps.platform.outputs.display_name) }}" == "true" ]]; then
+          # Create a file with the image URL for this specific build
+          mkdir -p /tmp/image-urls
+          echo "${{ steps.format-registry-tag.outputs.tag }}" > "/tmp/image-urls/${{ inputs.distribution }}-${{ steps.platform.outputs.display_name }}.txt"
+          echo "Image URL saved: ${{ steps.format-registry-tag.outputs.tag }}"
+        else
+          echo "Image not published for this platform/distribution combination"
+        fi
+
+    - name: Upload image URL artifact
+      uses: actions/upload-artifact@v4
+      if: ${{ inputs.publish_image == 'true' && contains(fromJSON('["amd64", "arm64"]'), steps.platform.outputs.display_name) }}
+      with:
+        name: image-url-${{ inputs.distribution }}-${{ steps.platform.outputs.display_name }}
+        path: /tmp/image-urls/${{ inputs.distribution }}-${{ steps.platform.outputs.display_name }}.txt
+        retention-days: 1
