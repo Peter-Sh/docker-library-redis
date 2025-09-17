@@ -21,7 +21,7 @@
 ##
 
 # Container initialization wait time in seconds
-CONTAINER_INIT_WAIT=6
+CONTAINER_INIT_WAIT=3
 
 if [ -z "$REDIS_IMG" ]; then
 	echo "REDIS_IMG may not be empty"
@@ -603,7 +603,7 @@ test_redis_server_persistence_with_bind_mount() {
 	container2=$(docker run --rm -d -v "$(pwd)/$dir":/data "$REDIS_IMG")
 	ret=$?
 	assertTrue "Container '$docker_flags $REDIS_IMG $docker_cmd' created" "[ $ret -eq 0 ]"
-	wait_for_redis_server_in_container "$container" || return 1
+	wait_for_redis_server_in_container "$container2" || return 1
 
 	value=$(echo "GET FOO" | docker exec -i "$container2" redis-cli)
 	assertEquals "$container" "$value"
@@ -641,7 +641,7 @@ test_redis_server_persistence_with_volume() {
 	container2=$(docker run --rm -d -v test_redis:/data "$REDIS_IMG")
 	ret=$?
 	assertTrue "Container '$docker_flags $REDIS_IMG $docker_cmd' created" "[ $ret -eq 0 ]"
-	wait_for_redis_server_in_container "$container" || return 1
+	wait_for_redis_server_in_container "$container2" || return 1
 
 	value=$(echo "GET FOO" | docker exec -i "$container2" redis-cli)
 	assertEquals "$container" "$value"
