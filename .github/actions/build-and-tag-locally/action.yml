@@ -99,8 +99,8 @@ runs:
         load: true
         platforms: ${{ inputs.platform }}
         tags: ${{ github.sha }}:${{ steps.platform.outputs.display_name }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=gha,scope=${{ inputs.distribution }}-${{ steps.platform.outputs.display_name }}
+        cache-to: type=gha,mode=max,scope=${{ inputs.distribution }}-${{ steps.platform.outputs.display_name }}
 
     - name: Save image
       shell: bash
