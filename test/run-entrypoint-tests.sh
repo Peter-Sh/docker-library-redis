@@ -63,7 +63,7 @@ fi
 #   1 if timeout CONTAINER_INIT_WAIT occurs
 wait_for_redis_server_in_container() {
 	local container="$1"
-	local timeout="${CONTAINER_INIT_WAIT:-3}"
+	local timeout="${CONTAINER_INIT_WAIT:-6}"
 	local elapsed=0
 	local sleep_interval=0.1
 
