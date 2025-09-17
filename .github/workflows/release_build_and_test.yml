@@ -116,23 +116,4 @@ jobs:
         with:
           name: release_handle
           path: release_handle.json
-          retention-days: 30
-
-      # - name: Create version tag
-      #   if: ${{ steps.merge-back.outputs.merge_commit_sha != '' }}
-      #   uses: redis/redis-oss-release-automation/.github/actions/create-tag-verified@main
-      #   with:
-      #     tag: v${{ github.event.inputs.release_tag }}
-      #     ref: ${{ steps.merge-back.outputs.merge_commit_sha }}
-      #     gh_token: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Test Release Automation Docker Image
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     docker run --rm \
-      #       -v ${{ github.workspace }}:/workspace \
-      #       -w /workspace \
-      #       -e FORCE_COLOR=1 \
-      #       $(echo "ghcr.io/${{ github.repository }}/release-automation:latest" | tr '[:upper:]' '[:lower:]')\
-      #       generate 8
+          retention-days: 400
