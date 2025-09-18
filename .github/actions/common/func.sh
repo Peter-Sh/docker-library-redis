@@ -345,7 +345,7 @@ slack_format_docker_image_urls_message() {
 # Create Slack message payload
     cat << EOF
 {
-"text": "🐳 Docker Images Published for Release $release_tag",
+"text": "🐳 Docker Images Published for Redis: $release_tag",
 "blocks": [
     {
     "type": "header",
@@ -366,7 +366,45 @@ slack_format_docker_image_urls_message() {
     "elements": [
         {
         "type": "mrkdwn",
-        "text": "f$footer"
+        "text": "$footer"
+        }
+    ]
+    }
+]
+}
+EOF
+}
+
+slack_format_docker_PR_message() {
+    release_tag=$1
+    url=$2
+    footer=$3
+
+# Create Slack message payload
+    cat << EOF
+{
+"text": "🐳 Docker Library PR created for Redis: $release_tag",
+"blocks": [
+    {
+    "type": "header",
+    "text": {
+        "type": "plain_text",
+        "text": "🐳 Docker Library PR created for Redis: $release_tag"
+    }
+    },
+    {
+    "type": "section",
+    "text": {
+        "type": "mrkdwn",
+        "text": "$url"
+    }
+    },
+    {
+    "type": "context",
+    "elements": [
+        {
+        "type": "mrkdwn",
+        "text": "$footer"
         }
     ]
     }
