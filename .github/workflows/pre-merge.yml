@@ -100,47 +100,11 @@ jobs:
     steps:
       - name: Send Slack notification
         run: |
-          # Parse the image URLs from JSON array
           image_urls='${{ needs.collect-image-urls.outputs.docker_image_urls }}'
+          workflow_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          footer="Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\` | Workflow: [View]($workflow_url)"
 
-          # Create formatted list of image URLs
-          formatted_urls=$(echo "$image_urls" | jq -r '.[] | "• `" + . + "`"' | tr '\n' '\n')
+          . .github/actions/common/func.sh
 
-          # Create Slack message payload
-          cat > slack_payload.json << EOF
-          {
-            "text": "🐳 Docker Images Published for Release ${{ inputs.release_tag }}",
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "🐳 Docker Images Published for Release ${{ inputs.release_tag }}"
-                }
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "The following Docker images have been successfully published:\n\n$formatted_urls"
-                }
-              },
-              {
-                "type": "context",
-                "elements": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\`"
-                  }
-                ]
-              }
-            ]
-          }
-          EOF
-
-          # Send to Slack
-          curl -X POST -H 'Content-type: application/json' \
-            --data @slack_payload.json \
-            "${{ secrets.SLACK_WEB_HOOK_URL }}"
-
-          echo "Slack notification sent for release ${{ inputs.release_tag }}"
+          echo "$image_urls" | slack_format_docker_image_urls_message "${{ inputs.release_tag }}" "$footer"  \
+          curl -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
