@@ -92,3 +92,55 @@ jobs:
           fi
 
           echo "urls=$urls" >> "$GITHUB_OUTPUT"
+
+  notify-slack:
+    runs-on: ubuntu-latest
+    needs: collect-image-urls
+    if: ${{ inputs.release_tag && needs.collect-image-urls.outputs.docker_image_urls != '[]' }}
+    steps:
+      - name: Send Slack notification
+        run: |
+          # Parse the image URLs from JSON array
+          image_urls='${{ needs.collect-image-urls.outputs.docker_image_urls }}'
+
+          # Create formatted list of image URLs
+          formatted_urls=$(echo "$image_urls" | jq -r '.[] | "• `" + . + "`"' | tr '\n' '\n')
+
+          # Create Slack message payload
+          cat > slack_payload.json << EOF
+          {
+            "text": "🐳 Docker Images Published for Release ${{ inputs.release_tag }}",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🐳 Docker Images Published for Release ${{ inputs.release_tag }}"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "The following Docker images have been successfully published:\n\n$formatted_urls"
+                }
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\`"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+
+          # Send to Slack
+          curl -X POST -H 'Content-type: application/json' \
+            --data @slack_payload.json \
+            "${{ secrets.SLACK_WEB_HOOK_URL }}"
+
+          echo "Slack notification sent for release ${{ inputs.release_tag }}"
