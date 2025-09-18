@@ -104,7 +104,7 @@ jobs:
           workflow_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           footer="Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\` | Workflow: [View]($workflow_url)"
 
-          . .github/actions/common/func.sh
+          . ${{ github.workspace}}/.github/actions/common/func.sh
 
           echo "$image_urls" | slack_format_docker_image_urls_message "${{ inputs.release_tag }}" "$footer"  \
           curl -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
