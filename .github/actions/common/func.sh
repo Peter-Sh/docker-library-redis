@@ -331,3 +331,46 @@ prepare_releases_list() {
     console_output 2 gray "$debug_output"
     decrease_indent_level
 }
+
+slack_format_docker_image_urls_message() {
+    # Parse the image URLs from JSON array
+    local image_urls formatted_urls release_tag footer
+    image_urls=$(cat)
+    release_tag=$1
+    footer=$2
+
+    # Create formatted list of image URLs
+    formatted_urls=$(echo "$image_urls" | jq -j '.[] | "\\n• \(.)"')
+
+# Create Slack message payload
+    cat << EOF
+{
+"text": "🐳 Docker Images Published for Release $release_tag",
+"blocks": [
+    {
+    "type": "header",
+    "text": {
+        "type": "plain_text",
+        "text": "🐳 Docker Images Published for Release $release_tag"
+    }
+    },
+    {
+    "type": "section",
+    "text": {
+        "type": "mrkdwn",
+        "text": "The following Docker images have been successfully published:\n\n$formatted_urls"
+    }
+    },
+    {
+    "type": "context",
+    "elements": [
+        {
+        "type": "mrkdwn",
+        "text": "f$footer"
+        }
+    ]
+    }
+]
+}
+EOF
+}
