@@ -105,7 +105,7 @@ jobs:
         run: |
           image_urls='${{ needs.collect-image-urls.outputs.docker_image_urls }}'
           workflow_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          footer="Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\` | Workflow: [View]($workflow_url)"
+          footer="Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\` | View: <$workflow_url|workflow run>"
 
           . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
 
