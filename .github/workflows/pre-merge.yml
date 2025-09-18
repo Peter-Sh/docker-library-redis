@@ -98,17 +98,15 @@ jobs:
     needs: collect-image-urls
     if: ${{ inputs.release_tag && needs.collect-image-urls.outputs.docker_image_urls != '[]' }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Send Slack notification
         run: |
           image_urls='${{ needs.collect-image-urls.outputs.docker_image_urls }}'
           workflow_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           footer="Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\` | Workflow: [View]($workflow_url)"
 
-          pwd
-          ls -la ${GITHUB_WORKSPACE}
-          find ${GITHUB_WORKSPACE} -name .github
-          find ${GITHUB_WORKSPACE} -name func.sh
-          echo ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
           . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
 
           echo "$image_urls" | slack_format_docker_image_urls_message "${{ inputs.release_tag }}" "$footer"  \
