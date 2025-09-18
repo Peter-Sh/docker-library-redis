@@ -30,6 +30,9 @@ jobs:
           pwd
           ls -la ${GITHUB_WORKSPACE}
           find ${GITHUB_WORKSPACE} -name .github
+          find ${GITHUB_WORKSPACE} -name func.sh
+          echo ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
+          . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
           exit 1
 
       - name: Log in to Container Registry
