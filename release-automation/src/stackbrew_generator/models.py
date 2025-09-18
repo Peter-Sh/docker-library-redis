@@ -68,6 +68,16 @@ class RedisVersion(BaseModel):
         """Get the mainline version string (major.minor)."""
         return f"{self.major}.{self.minor}"
 
+    @property
+    def sort_key(self) -> str:
+        suffix_weight = 0
+        if self.suffix.startswith("rc"):
+            suffix_weight = 100
+        elif self.suffix.startswith("m"):
+            suffix_weight = 50
+
+        return f"{self.major}.{self.minor}.{self.patch or 0}.{suffix_weight}.{self.suffix}"
+
     def __str__(self) -> str:
         """String representation of the version."""
         version = f"{self.major}.{self.minor}"
