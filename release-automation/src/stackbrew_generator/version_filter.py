@@ -2,6 +2,8 @@
 
 from typing import Dict, List, Tuple
 
+from collections import OrderedDict
+
 from packaging.version import Version
 from rich.console import Console
 
@@ -47,10 +49,11 @@ class VersionFilter:
                 continue
 
         # Sort by version (newest first)
-        versions.sort(key=lambda x: x[0], reverse=True)
+        versions.sort(key=lambda x: x[0].sort_key, reverse=True)
 
         console.print(f"[dim]Parsed {len(versions)} valid versions[/dim]")
         return versions
+
 
     def filter_eol_versions(self, versions: List[Tuple[RedisVersion, str, str]]) -> List[Tuple[RedisVersion, str, str]]:
         """Filter out end-of-life versions.
@@ -99,24 +102,25 @@ class VersionFilter:
         """
         console.print("[blue]Filtering to actual versions (latest patch per minor/milestone)[/blue]")
 
-        seen_combinations = set()
-        filtered_versions = []
+        patch_versions = OrderedDict()
 
         for version, commit, tag_ref in versions:
-            # Create a key for minor version + milestone status
-            combination_key = (version.mainline_version, version.is_milestone)
+            patch_key = (version.major, version.minor, version.patch)
+            if patch_key not in patch_versions:
+                patch_versions[patch_key] = (version, commit, tag_ref)
+            elif patch_versions[patch_key][0].is_milestone and not version.is_milestone:
+                # GA always takes precedence over milestone for the same major.minor.patch
+                patch_versions[patch_key] = (version, commit, tag_ref)
 
-            if combination_key not in seen_combinations:
-                seen_combinations.add(combination_key)
+        print(patch_versions.values())
+        filtered_versions = []
+        mainlines_with_ga = set()
+
+        for version, commit, tag_ref in patch_versions.values():
+            if version.mainline_version not in mainlines_with_ga:
+                if not version.is_milestone:
+                    mainlines_with_ga.add(version.mainline_version)
                 filtered_versions.append((version, commit, tag_ref))
-
-                milestone_str = "milestone" if version.is_milestone else "GA"
-                console.print(f"[dim]Selected [bold yellow]{version}[/bold yellow] ({milestone_str}) - {commit[:8]}[/dim]")
-            else:
-                milestone_str = "milestone" if version.is_milestone else "GA"
-                console.print(f"[dim]Skipping {version} ({milestone_str}) - already have this minor/milestone combination[/dim]")
-
-        console.print(f"[dim]Selected {len(filtered_versions)} actual versions[/dim]")
         return filtered_versions
 
     def get_actual_major_redis_versions(self, major_version: int) -> List[Tuple[RedisVersion, str, str]]:
