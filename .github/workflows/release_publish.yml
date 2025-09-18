@@ -13,8 +13,8 @@ on:
         required: false
 
 env:
-  TARGET_OFFICIAL_IMAGES_REPO: docker-library/official-images
-  #TARGET_OFFICIAL_IMAGES_REPO: Peter-Sh/official-images
+  #TARGET_OFFICIAL_IMAGES_REPO: docker-library/official-images
+  TARGET_OFFICIAL_IMAGES_REPO: Peter-Sh/official-images
   FORKED_OFFICIAL_IMAGES_REPO: redis-developer/docker-library-official-images
 
 # UUID is used to help automation to identify workflow run in the list of workflow runs.
@@ -140,7 +140,7 @@ jobs:
       - name: Send Slack notification
         run: |
           workflow_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          footer="Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\` | Workflow: [View]($workflow_url)"
+          footer="Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\` | View: <$workflow_url|workflow run>"
 
           . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
 
