@@ -118,6 +118,9 @@ jobs:
     needs: collect-image-urls
     if: ${{ inputs.release_tag && failure() }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Send Failure Slack notification
         run: |
           workflow_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
