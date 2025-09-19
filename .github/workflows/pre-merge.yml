@@ -128,5 +128,5 @@ jobs:
 
           . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
 
-          slack_format_failure_message "Docker Build failed for Redis: ${{ steps.parse-release.outputs.release_version || 'unknown'}}" "$workflow_url" "$footer" \
+          slack_format_failure_message "Docker Build failed for Redis: ${{ inputs.release_tag  || 'unknown'}}" "$workflow_url" "$footer" \
           | curl -s --fail-with-body -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
