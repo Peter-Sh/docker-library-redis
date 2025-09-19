@@ -415,7 +415,7 @@ slack_format_docker_PR_message() {
 EOF
 }
 
-slack_format_docker_PR_failed_message() {
+slack_format_failure_message() {
     header=$1
     workflow_url=$2
     footer=$3
