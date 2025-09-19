@@ -95,7 +95,6 @@ jobs:
             update-stackbrew-file $MAJOR_VERSION --input official-images/library/redis --output official-images/library/redis
           cd official-images && git diff --color
           cd -
-          exit 1
 
       - name: Create pull request to official-images
         id: create-pr
