@@ -145,6 +145,7 @@ class TestVersionFilter:
             "v8.2.1",
             "v8.2.0",
             "v8.1.0-eol",
+            "v8.1.0-zoo1",
             "v8.1.2",
             "v8.0.1",
             "v8.0.0"

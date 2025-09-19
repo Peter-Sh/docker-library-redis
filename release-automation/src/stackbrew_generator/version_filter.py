@@ -86,7 +86,7 @@ class VersionFilter:
                 filtered_versions.extend(minor_group)
 
         # Sort again after filtering
-        filtered_versions.sort(key=lambda x: x[0], reverse=True)
+        filtered_versions.sort(key=lambda x: x[0].sort_key, reverse=True)
 
         console.print(f"[dim]Kept {len(filtered_versions)} versions after EOL filtering[/dim]")
         return filtered_versions
