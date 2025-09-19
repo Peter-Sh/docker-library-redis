@@ -334,45 +334,45 @@ prepare_releases_list() {
 
 slack_format_docker_image_urls_message() {
     # Parse the image URLs from JSON array
-    local image_urls formatted_urls release_tag footer
-    image_urls=$(cat)
-    release_tag=$1
-    footer=$2
-
-    # Create formatted list of image URLs
-    formatted_urls=$(echo "$image_urls" | jq -j '.[] | "\\n• \(.)"')
-
-# Create Slack message payload
-    cat << EOF
-{
-"text": "🐳 Docker Images Published for Redis: $release_tag",
-"blocks": [
-    {
-    "type": "header",
-    "text": {
-        "type": "plain_text",
-        "text": "🐳 Docker Images Published for Release $release_tag"
-    }
-    },
-    {
-    "type": "section",
-    "text": {
-        "type": "mrkdwn",
-        "text": "The following Docker images have been successfully published:\n\n$formatted_urls"
-    }
-    },
-    {
-    "type": "context",
-    "elements": [
-        {
-        "type": "mrkdwn",
-        "text": "$footer"
-        }
-    ]
-    }
-]
-}
-EOF
+    jq --arg release_tag "$1" --arg footer "$2" '
+        map(
+            capture("(?<url>(?<prefix>[^:]+:)(?<version>[^-]+)-(?<commit>[a-f0-9]+)-(?<distro>[^-]+)-(?<arch>[^-]+))$")
+        )
+        as $items
+        | {
+            text: ("🐳 Docker Images Published for Redis: " + $release_tag),
+            blocks: [
+                {
+                "type": "header",
+                "text": { "type": "plain_text", "text": ("🐳 Docker Images Published for Release " + $release_tag) }
+                },
+                {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": (
+                    "The following Docker images have been published to Github Container Registry:\n\n" +
+                    (
+                        $items
+                        | map(
+                            "Distribution: *" + .distro + "* "
+                            + "Architecture: *" + .arch + "*"
+                            + "\n```\n" + .url + "\n```"
+                        )
+                        | join("\n\n")
+                    )
+                    )
+                }
+                },
+                {
+                "type": "context",
+                "elements": [
+                    { "type": "mrkdwn", "text": $footer }
+                ]
+                }
+            ]
+            }
+        '
 }
 
 slack_format_docker_PR_message() {
