@@ -110,4 +110,4 @@ jobs:
           . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
 
           echo "$image_urls" | slack_format_docker_image_urls_message "${{ inputs.release_tag }}" "$footer"  \
-          | curl -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
+          | curl -s --fail-with-body -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
