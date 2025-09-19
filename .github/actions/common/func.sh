@@ -340,6 +340,7 @@ slack_format_docker_image_urls_message() {
         )
         as $items
         | {
+            icon_url: ":redis-circle:",
             text: ("🐳 Docker Images Published for Redis: " + $release_tag),
             blocks: [
                 {
@@ -383,6 +384,7 @@ slack_format_docker_PR_message() {
 # Create Slack message payload
     cat << EOF
 {
+"icon_url": ":redis-circle:",
 "text": "🐳 Docker Library PR created for Redis: $release_tag",
 "blocks": [
     {
