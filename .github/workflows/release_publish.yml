@@ -13,10 +13,10 @@ on:
         required: false
 
 env:
-  #TARGET_OFFICIAL_IMAGES_REPO: docker-library/official-images
+  TARGET_OFFICIAL_IMAGES_REPO: docker-library/official-images
   TARGET_OFFICIAL_IMAGES_REPO: Peter-Sh/official-images
   FORKED_OFFICIAL_IMAGES_REPO: redis-developer/docker-library-official-images
-  #PR_USER_MENTIONS: "@adamiBs @yossigo @adobrzhansky @maxb-io @dagansandler @Peter-Sh"
+  PR_USER_MENTIONS: "@adamiBs @yossigo @adobrzhansky @maxb-io @dagansandler @Peter-Sh"
   PR_USER_MENTIONS: ""
 
 # UUID is used to help automation to identify workflow run in the list of workflow runs.
@@ -108,9 +108,6 @@ jobs:
           commit-message: "Redis: Update to ${{ steps.parse-release.outputs.release_version }}"
           title: "Redis: Update to ${{ steps.parse-release.outputs.release_version }}"
           body: |
-            THIS IS A DRAFT PR FOR AUTOMATION TESTING
-            PLEASE IGNORE IT AND SORRY FOR THE BOTHERING
-
             Automated update for Redis ${{ steps.parse-release.outputs.release_version }}
 
             Release commit: ${{ steps.parse-release.outputs.release_commit_sha }}
