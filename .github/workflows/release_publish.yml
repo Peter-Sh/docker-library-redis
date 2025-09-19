@@ -115,7 +115,7 @@ jobs:
 
             Release commit: ${{ steps.parse-release.outputs.release_commit_sha }}
             Release tag: v${{ steps.parse-release.outputs.release_version }}
-            Compare: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/compare/v${{ steps.parse-release.outputs.release_version }}^1...v${{ steps.parse-release.outputs.release_version }}
+            Compare: ${{ github.server_url }}/${{ github.repository }}/compare/v${{ steps.parse-release.outputs.release_version }}^1...v${{ steps.parse-release.outputs.release_version }}
 
             ${{ env.PR_USER_MENTIONS }}
 
