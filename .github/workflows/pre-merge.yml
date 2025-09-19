@@ -92,7 +92,6 @@ jobs:
           fi
 
           echo "urls=$urls" >> "$GITHUB_OUTPUT"
-          exit 1
 
   notify-slack:
     runs-on: ubuntu-latest
