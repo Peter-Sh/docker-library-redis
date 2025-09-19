@@ -107,12 +107,15 @@ jobs:
           title: "Redis: Update to ${{ steps.parse-release.outputs.release_version }}"
           body: |
             THIS IS A DRAFT PR FOR AUTOMATION TESTING
-            PLEASE IGNORE AND SORRY FOR BOTHERING
+            PLEASE IGNORE IT AND SORRY FOR THE BOTHERING
 
             Automated update for Redis ${{ steps.parse-release.outputs.release_version }}
 
             Release commit: ${{ steps.parse-release.outputs.release_commit_sha }}
             Release tag: v${{ steps.parse-release.outputs.release_version }}
+            Compare: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/compare/v${{ steps.parse-release.outputs.release_version }}^1...v${{ steps.parse-release.outputs.release_version }}
+
+            @adamiBs @yossigo @adobrzhansky @maxb-io @dagansandler @Peter-Sh
 
       - name: PR creation results
         run: |
