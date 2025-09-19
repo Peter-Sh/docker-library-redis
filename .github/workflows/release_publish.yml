@@ -95,6 +95,7 @@ jobs:
             update-stackbrew-file $MAJOR_VERSION --input official-images/library/redis --output official-images/library/redis
           cd official-images && git diff --color
           cd -
+          exit 1
 
       - name: Create pull request to official-images
         id: create-pr
@@ -150,4 +151,15 @@ jobs:
           . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
 
           slack_format_docker_PR_message "${{ steps.parse-release.outputs.release_version }}" "${{ steps.create-pr.outputs.pull-request-url }}" "$footer" \
+          | curl -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
+
+      - name: Send Failure Slack notification
+        if: failure()
+        run: |
+          workflow_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          footer="Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\`"
+
+          . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
+
+          slack_format_failure_message "Docker PR failed for Redis: ${{ steps.parse-release.outputs.release_version || 'unknown'}}" "$workflow_url" "$footer" \
           | curl -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
