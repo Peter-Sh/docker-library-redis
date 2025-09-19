@@ -18,25 +18,24 @@ on:
 
 jobs:
   build-and-test:
-    #runs-on: ${{ contains(matrix.platform, 'arm64') && 'ubuntu24-arm64-2-8' || 'ubuntu-latest' }}
-    runs-on: ["${{ contains(matrix.platform, 'arm64') && 'ARM64' || 'X64' }}", "self-hosted"]
+    runs-on: ${{ contains(matrix.platform, 'arm64') && 'ubuntu24-arm64-2-8' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
         distribution:
           - debian
-          # - alpine
+          - alpine
         platform:
           - linux/amd64
-          # - linux/i386
-          # - linux/arm/v5
-          # - linux/arm/v6
-          # - linux/arm/v7
-          # - linux/mips64le
-          # - linux/ppc64le
-          # - linux/s390x
+          - linux/i386
+          - linux/arm/v5
+          - linux/arm/v6
+          - linux/arm/v7
+          - linux/mips64le
+          - linux/ppc64le
+          - linux/s390x
           - linux/arm64
-          # - linux/riscv64
+          - linux/riscv64
         exclude:
         - distribution: alpine
           platform: linux/mips64le
@@ -59,10 +58,10 @@ jobs:
         with:
           distribution: ${{ matrix.distribution }}
           platform: ${{ matrix.platform }}
-          registry_username: ${{ vars.REGISTRY_REPOSITORY == 'ghcr.io' && github.actor || vars.REGISTRY_USERNAME }}
-          registry_password: ${{ vars.REGISTRY_REPOSITORY == 'ghcr.io' && secrets.GITHUB_TOKEN || secrets.REGISTRY_PASSWORD }}
+          registry_username: ${{ github.actor }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
           publish_image: ${{ vars.PUBLISH_IMAGE }}
-          registry_repository: ${{ vars.REGISTRY_REPOSITORY == 'ghcr.io' && format('ghcr.io/{0}', github.repository) || vars.REGISTRY_REPOSITORY }}
+          registry_repository: ${{ format('ghcr.io/{0}', github.repository) }}
           release_tag: ${{ inputs.release_tag }}
 
   collect-image-urls:
