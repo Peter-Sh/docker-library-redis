@@ -112,7 +112,6 @@ class VersionFilter:
                 # GA always takes precedence over milestone for the same major.minor.patch
                 patch_versions[patch_key] = (version, commit, tag_ref)
 
-        print(patch_versions.values())
         filtered_versions = []
         mainlines_with_ga = set()
 
