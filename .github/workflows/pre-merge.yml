@@ -92,6 +92,7 @@ jobs:
           fi
 
           echo "urls=$urls" >> "$GITHUB_OUTPUT"
+          exit 1
 
   notify-slack:
     runs-on: ubuntu-latest
@@ -110,4 +111,19 @@ jobs:
           . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
 
           echo "$image_urls" | slack_format_docker_image_urls_message "${{ inputs.release_tag }}" "$footer"  \
+          | curl -s --fail-with-body -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
+
+  notify-slack-when-failed:
+    runs-on: ubuntu-latest
+    needs: collect-image-urls
+    if: ${{ inputs.release_tag && failure() }}
+    steps:
+      - name: Send Failure Slack notification
+        run: |
+          workflow_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          footer="Repository: ${{ github.repository }} | Commit: \`${{ github.sha }}\`"
+
+          . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
+
+          slack_format_failure_message "Docker Build failed for Redis: ${{ steps.parse-release.outputs.release_version || 'unknown'}}" "$workflow_url" "$footer" \
           | curl -s --fail-with-body -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
