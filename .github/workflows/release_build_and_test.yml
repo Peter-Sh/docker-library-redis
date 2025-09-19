@@ -32,13 +32,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate Redis Release Archive
-        uses: redis/redis-oss-release-automation/.github/actions/validate-redis-release-archive@main
+        uses: redis-developer/redis-oss-release-automation/.github/actions/validate-redis-release-archive@main
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
 
       - name: Ensure Release Branch
         id: ensure-branch
-        uses: redis/redis-oss-release-automation/.github/actions/ensure-release-branch@main
+        uses: redis-developer/redis-oss-release-automation/.github/actions/ensure-release-branch@main
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
           allow_modify: true
@@ -68,7 +68,7 @@ jobs:
 
       - name: Ensure Release Branch
         id: ensure-branch
-        uses: redis/redis-oss-release-automation/.github/actions/ensure-release-branch@main
+        uses: redis-developer/redis-oss-release-automation/.github/actions/ensure-release-branch@main
         with:
           release_tag: ${{ github.event.inputs.release_tag }}
           allow_modify: false
@@ -76,7 +76,7 @@ jobs:
 
       - name: Merge back to release branch
         id: merge-back
-        uses: redis/redis-oss-release-automation/.github/actions/merge-branches-verified@main
+        uses: redis-developer/redis-oss-release-automation/.github/actions/merge-branches-verified@main
         with:
           from_branch: ${{ steps.ensure-branch.outputs.release_version_branch }}
           to_branch: ${{ steps.ensure-branch.outputs.release_branch }}
