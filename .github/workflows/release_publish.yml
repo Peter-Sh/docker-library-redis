@@ -151,7 +151,7 @@ jobs:
           . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
 
           slack_format_docker_PR_message "${{ steps.parse-release.outputs.release_version }}" "${{ steps.create-pr.outputs.pull-request-url }}" "$footer" \
-          | curl -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
+          | curl -s --fail-with-body -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
 
       - name: Send Failure Slack notification
         if: failure()
@@ -162,4 +162,4 @@ jobs:
           . ${GITHUB_WORKSPACE}/.github/actions/common/func.sh
 
           slack_format_failure_message "Docker PR failed for Redis: ${{ steps.parse-release.outputs.release_version || 'unknown'}}" "$workflow_url" "$footer" \
-          | curl -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
+          | curl -s --fail-with-body -d@- "${{ secrets.SLACK_WEB_HOOK_URL }}"
